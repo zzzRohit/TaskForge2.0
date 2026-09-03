@@ -1,0 +1,185 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+// ==============================
+// USER
+// ==============================
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+
+  organizations OrganizationMember[]
+  ownedBoards   Board[]
+  boardMembers  BoardMember[]
+  comments      Comment[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ==============================
+// ORGANIZATION
+// ==============================
+
+model Organization {
+  id          String   @id @default(cuid())
+  name        String
+
+  members     OrganizationMember[]
+  boards      Board[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==============================
+// ORGANIZATION MEMBER
+// ==============================
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+
+  organizationId String
+  userId         String
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role           OrganizationRole @default(MEMBER)
+
+  createdAt      DateTime @default(now())
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+// ==============================
+// BOARD
+// ==============================
+
+model Board {
+  id             String       @id @default(cuid())
+  title          String
+  description    String?
+
+  organizationId String
+  ownerId        String
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner          User         @relation(fields: [ownerId], references: [id])
+
+  members        BoardMember[]
+  lists          List[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([ownerId])
+}
+
+// ==============================
+// BOARD MEMBER
+// ==============================
+
+model BoardMember {
+  id        String   @id @default(cuid())
+
+  boardId   String
+  userId    String
+
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role      BoardRole @default(MEMBER)
+
+  createdAt DateTime @default(now())
+
+  @@unique([boardId, userId])
+  @@index([userId])
+}
+
+// ==============================
+// LIST / COLUMN
+// ==============================
+
+model List {
+  id        String   @id @default(cuid())
+  title     String
+  position  Float
+
+  boardId   String
+
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards     Card[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([boardId])
+}
+
+// ==============================
+// CARD / ISSUE
+// ==============================
+
+model Card {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  position    Float
+
+  listId      String
+
+  list        List     @relation(fields: [listId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([listId])
+}
+
+// ==============================
+// COMMENT
+// ==============================
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+
+  cardId    String
+  userId    String
+
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cardId])
+  @@index([userId])
+}
+
+// ==============================
+// ENUMS
+// ==============================
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum BoardRole {
+  OWNER
+  MEMBER
+}
