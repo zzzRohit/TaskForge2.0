@@ -7,11 +7,19 @@ export const createOrganization = async (request: Request, response: Response) =
     if (!name) {
       return response.status(400).json({ error: "Organization name is required" });
     }
-    const createdOrganization = await organizationService.createOrganization(name);
+    const userId = request.userId; // Assuming userId is set in the auth middleware
+    if(!userId) {
+      return response.status(401).json({ error: "Unauthorized" });
+    }
+    const createdOrganization = await organizationService.createOrganization(name, userId);
     return response.status(201).json(createdOrganization);
 
 };
 export const getAllOrganizations = async (request: Request, response: Response) => {
-  const organizations = await organizationService.getAllOrganizations();
+  const userId = request.userId; // Assuming userId is set in the auth middleware
+  if(!userId) {
+    return response.status(401).json({ error: "Unauthorized" });
+  }
+  const organizations = await organizationService.getAllOrganizations(userId);
   return response.status(200).json(organizations);
 }

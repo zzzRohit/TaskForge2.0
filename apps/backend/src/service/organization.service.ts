@@ -1,5 +1,5 @@
 import { prisma } from "@taskforge/db";
-export const createOrganization = async (name: string) => {
+export const createOrganization = async (name: string, userId: string) => {
   // Implementation for creating an organization
   // Example implementation (replace with actual logic):
   if (!name) {
@@ -7,11 +7,26 @@ export const createOrganization = async (name: string) => {
   }
   // Simulate organization creation
   const createdOrganization = await prisma.organization.create({
-    data: { name },
+    data: { 
+      name,
+      members: {
+        create: {
+          userId: userId,
+          role: "OWNER", // Assuming the creator is the owner of the organization
+        },
+      },
+     },
   });
   return createdOrganization;
 };
-export const getAllOrganizations = async () => {
-  return prisma.organization.findMany();
-}
-
+export const getAllOrganizations = async (userId: string) => {
+  return prisma.organization.findMany({
+    where: {
+      members: {
+        some: {
+          userId: userId
+        }
+      }
+    }
+  });
+};
