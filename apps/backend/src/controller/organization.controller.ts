@@ -23,3 +23,21 @@ export const getAllOrganizations = async (request: Request, response: Response) 
   const organizations = await organizationService.getAllOrganizations(userId);
   return response.status(200).json(organizations);
 }
+
+export const getOrganizationById = async (
+  request: Request<{ organizationId: string }>,
+  response: Response
+) => {
+  const { organizationId } = request.params;
+
+  const organization =
+    await organizationService.getOrganizationById(organizationId);
+
+  if (!organization) {
+    return response.status(404).json({
+      error: "Organization not found",
+    });
+  }
+
+  return response.status(200).json(organization);
+};

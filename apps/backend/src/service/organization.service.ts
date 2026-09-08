@@ -30,3 +30,11 @@ export const getAllOrganizations = async (userId: string) => {
     }
   });
 };
+
+export const getOrganizationById = async (organizationId: string) => {
+  return prisma.organization.findFirst({
+    where: {
+      id: organizationId
+    }
+  });
+};
