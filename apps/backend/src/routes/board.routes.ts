@@ -4,5 +4,5 @@ import { authMiddleware } from '../middleware/auth.middleware';
 import { organizationMiddleware } from '../middleware/organization.middleware';
 
 const router = Router();
-router.post("/:organizationId/boards", authMiddleware, organizationMiddleware, boardController.createBoard);
+router.post("/:organizationId/board", authMiddleware, organizationMiddleware, boardController.createBoard);
 export default router;
