@@ -28,7 +28,6 @@ export const organizationMiddleware = async (
       },
     },
   });
-  console.log("isUserInOrganization", isUserInOrganization);
   if (!isUserInOrganization) {
     return res.status(403).json({
       message: "You are not a member of this organization",

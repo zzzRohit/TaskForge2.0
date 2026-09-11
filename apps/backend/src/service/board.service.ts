@@ -15,3 +15,18 @@ export const createBoard = async (input: CreateBoardInput) => {
         }
     })
 }
+export const getBoardsByOrganizationId = async (organizationId: string) => {
+    return await prisma.board.findMany({
+        where: {
+            organizationId: organizationId
+        }
+    })
+}
+export const getBoardById = async (organizationId: string, boardId: string) => {
+    return await prisma.board.findFirst({
+        where: {
+            id : boardId,
+            organizationId: organizationId
+            }
+    })
+}
