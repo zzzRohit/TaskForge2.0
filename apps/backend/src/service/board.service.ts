@@ -30,3 +30,15 @@ export const getBoardById = async (organizationId: string, boardId: string) => {
             }
     })
 }
+export const updateBoard = async (input: { organizationId: string, boardId: string, title?: string, description?: string, userId: string }) => {
+    const board = await prisma.board.update({
+        where: {
+            id: input.boardId
+        },
+        data: {
+            title: input.title,
+            description: input.description
+        }
+    })
+    return board;
+}

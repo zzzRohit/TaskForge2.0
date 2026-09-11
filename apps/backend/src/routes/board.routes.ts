@@ -11,4 +11,5 @@ router.get("/:organizationId/boards", authMiddleware, organizationMiddleware, bo
 // get single board by id
 router.get("/:organizationId/board/:boardId", authMiddleware, organizationMiddleware, boardController.getBoardById);
 
+router.patch("/:organizationId/board/:boardId", authMiddleware, organizationMiddleware, boardController.updateBoard);
 export default router;
