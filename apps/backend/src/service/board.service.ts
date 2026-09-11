@@ -42,3 +42,11 @@ export const updateBoard = async (input: { organizationId: string, boardId: stri
     })
     return board;
 }
+export const deleteBoard = async (input: { organizationId: string, boardId: string, userId: string }) => {
+    const board = await prisma.board.delete({
+        where: {
+            id: input.boardId
+        }
+    })
+    return board;
+}   

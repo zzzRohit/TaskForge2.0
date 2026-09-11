@@ -35,3 +35,12 @@ export const updateBoard = async (req: Request<{ organizationId: string, boardId
     }
     res.status(200).json(updatedBoard);
 }
+export const deleteBoard = async (req: Request<{ organizationId: string, boardId: string }>, res: Response) => {
+    const { organizationId, boardId } = req.params;
+    const userId = req.userId!; // Assuming userId is set in the auth middleware
+    const deletedBoard = await boardService.deleteBoard({ organizationId, boardId, userId });
+    if (!deletedBoard) {
+        return res.status(404).json({ error: 'Board not found or you do not have permission to delete it' });
+    }
+    res.status(200).json(deletedBoard);
+}

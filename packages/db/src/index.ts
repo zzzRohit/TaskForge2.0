@@ -3,6 +3,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 import { Pool } from "pg";
 
+export { OrganizationRole } from "@prisma/client";
+
 const globalForPrisma = globalThis as unknown as {
   pool: Pool | undefined;
   prisma: PrismaClient | undefined;
