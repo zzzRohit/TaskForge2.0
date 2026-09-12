@@ -11,3 +11,35 @@ export const createList = async (req:Request<{boardId: string , organizationId: 
     
     res.status(201).json({status:"success" , data:list});
 }
+export const getListsByBoardId = async (req:Request<{boardId: string , organizationId: string}>, res: Response) => {
+    const { boardId } = req.params;
+    const lists = await listservice.getListsByBoardId(boardId);
+    res.status(200).json({status:"success" , data:lists});
+}
+export const getlist= async(req:Request<{boardId: string , organizationId: string , listId: string}>, res: Response) => {
+    const { listId } = req.params;
+    const list = await listservice.getListById(listId);
+    if(!list){
+        throw new AppError("List not found", 404);
+    }
+    res.status(200).json({status:"success" , data:list});
+}
+export const updateList = async(req:Request<{boardId: string , organizationId: string , listId: string}>, res: Response) => {
+    const { listId } = req.params;
+    const { title, position } = req.body;
+    const list = await listservice.getListById(listId);
+    if(!list){
+        throw new AppError("List not found", 404);
+    }
+    const updatedList = await listservice.updateList(listId, { title, position });
+    res.status(200).json({status:"success" , data:updatedList});
+}    
+export const deleteList = async(req:Request<{boardId: string , organizationId: string , listId: string}>, res: Response) => {
+    const {listId} = req.params;
+    const list = await listservice.getListById(listId);
+    if(!list){
+        throw new AppError("List not found", 404);
+    }
+    await listservice.deleteList(listId);
+    res.status(200).json({status:"success",message:"List deleted successfully" , data:null});
+}
