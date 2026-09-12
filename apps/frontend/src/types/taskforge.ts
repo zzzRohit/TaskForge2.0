@@ -20,3 +20,15 @@ export type Board = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type Role = "OWNER" | "ADMIN" | "MEMBER";
+
+export type MockOrganization = Organization & {
+  role: Role;
+  members: number;
+  boards: number;
+};
+
+export type MockBoard = Board & {
+  updatedLabel: string;
+};

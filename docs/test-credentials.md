@@ -14,7 +14,7 @@ The seed does not delete existing data. It updates the password and name of thes
 
 | User   | Email                    | Password          | Roles                          |
 | ------ | ------------------------ | ----------------- | ------------------------------ |
-| User 1 | `owner@taskforge.test`   | `OwnerPass123!`   | OWNER in Alpha and Beta        |
+| User 1 | `owner@taskForge.test`   | `OwnerPass123!`   | OWNER in Alpha and Beta        |
 | User 2 | `admin@taskforge.test`   | `AdminPass123!`   | ADMIN in Alpha; OWNER in Gamma |
 | User 3 | `member@taskforge.test`  | `MemberPass123!`  | MEMBER in Alpha and Gamma      |
 | User 4 | `admin2@taskforge.test`  | `Admin2Pass123!`  | ADMIN in Beta                  |
