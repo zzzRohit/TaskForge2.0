@@ -7,7 +7,12 @@ import cookieParser from "cookie-parser";
 import boardRoutes from "./routes/board.routes";
 import listRoutes from "./routes/list.routes";
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use("/organization", orgainizationRoutes);
