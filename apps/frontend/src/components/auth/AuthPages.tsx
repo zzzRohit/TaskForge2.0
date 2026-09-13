@@ -2,7 +2,7 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Field";
-
+import { signup } from "../../lib/api/auth";
 type AuthMode = "login" | "signup";
 
 type FieldErrors = Record<string, string>;
@@ -15,7 +15,7 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [notice, setNotice] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors: FieldErrors = {};
 
@@ -36,10 +36,7 @@ export function LoginPage() {
 
     setIsLoading(true);
     setNotice("");
-    window.setTimeout(() => {
-      setIsLoading(false);
-      navigate("/organizations");
-    }, 700);
+    
   }
 
   return (
@@ -88,7 +85,7 @@ export function SignupPage() {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors: FieldErrors = {};
 
@@ -117,11 +114,18 @@ export function SignupPage() {
 
     setIsLoading(true);
     setNotice("");
-    window.setTimeout(() => {
+    form.name
+    try {
+      await signup({name :form.name , email : form.email , password : form.password});
+      setNotice("Login successful. Redirecting...");
+      window.setTimeout(() => {
+        navigate("/login");
+      }, 500);
+    } catch (error) {
+      setNotice("An error occurred. Please try again.");
+    }finally {
       setIsLoading(false);
-      setNotice("Account created. Redirecting...");
-      window.setTimeout(() => navigate("/organizations"), 500);
-    }, 700);
+    }
   }
 
   return (
@@ -157,13 +161,21 @@ export function SignupPage() {
           autoComplete="new-password"
           error={errors.confirmPassword}
           label="Confirm Password"
-          onChange={(event) => updateField("confirmPassword", event.target.value)}
+          onChange={(event) =>
+            updateField("confirmPassword", event.target.value)
+          }
           placeholder="Confirm your password"
           type="password"
           value={form.confirmPassword}
         />
         {notice ? (
-          <p className={notice.startsWith("Account") ? "text-sm text-success" : "text-sm text-danger"}>
+          <p
+            className={
+              notice.startsWith("Account")
+                ? "text-sm text-success"
+                : "text-sm text-danger"
+            }
+          >
             {notice}
           </p>
         ) : null}
