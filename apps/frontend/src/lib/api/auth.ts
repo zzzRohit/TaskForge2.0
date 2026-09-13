@@ -12,3 +12,7 @@ export async function signup(data: SignupInput): Promise<User> {
 
   return response.data;
 }
+export async function login(email: string, password: string): Promise<User> {
+  const response = await api.post<User>("/auth/signin", { email, password });
+  return response.data;
+}

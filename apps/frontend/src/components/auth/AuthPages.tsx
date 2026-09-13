@@ -2,7 +2,7 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Field";
-import { signup } from "../../lib/api/auth";
+import { login, signup } from "../../lib/api/auth";
 type AuthMode = "login" | "signup";
 
 type FieldErrors = Record<string, string>;
@@ -36,7 +36,17 @@ export function LoginPage() {
 
     setIsLoading(true);
     setNotice("");
-    
+    try {
+      await login(email, password);
+      setNotice("Login successful. Redirecting...");
+      window.setTimeout(() => {
+        navigate("/organizations");
+      }, 500);
+    } catch {
+      setNotice("Invalid email or password. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -114,16 +124,20 @@ export function SignupPage() {
 
     setIsLoading(true);
     setNotice("");
-    form.name
+    form.name;
     try {
-      await signup({name :form.name , email : form.email , password : form.password});
+      await signup({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      });
       setNotice("Login successful. Redirecting...");
       window.setTimeout(() => {
         navigate("/login");
       }, 500);
     } catch (error) {
       setNotice("An error occurred. Please try again.");
-    }finally {
+    } finally {
       setIsLoading(false);
     }
   }
