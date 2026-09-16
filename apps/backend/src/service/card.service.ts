@@ -7,6 +7,9 @@ interface CreateCardInput {
   description?: string;
   userId: string;
 }
+interface getCardInput{
+  listId:string;
+}
 
 export const cardService = {
   createCard: async ({
@@ -69,4 +72,17 @@ export const cardService = {
       },
     });
   },
+  getcards :async ({
+    listId
+  }:getCardInput)=>{
+    const cards = await prisma.card.findMany({
+      where:{
+        listId ,
+      },
+      orderBy:{
+        position:"asc"
+      }
+    });
+    return cards;
+  }
 };

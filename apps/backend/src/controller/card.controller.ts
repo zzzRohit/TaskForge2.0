@@ -4,9 +4,9 @@ import { AppError } from "../utils/app-error";
 
 export const cardController = {
   createCard: async (
-    req: Request<{listId:string}>,
+    req: Request<{ listId: string }>,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) => {
     try {
       const { listId } = req.params;
@@ -27,5 +27,14 @@ export const cardController = {
     } catch (error) {
       next(error);
     }
+  },
+  getcard: async (
+    req: Request<{ listId: string }>,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    const { listId } = req.params;
+    const cards = await cardService.getcards({ listId });
+    return res.status(201).json(cards);
   },
 };
