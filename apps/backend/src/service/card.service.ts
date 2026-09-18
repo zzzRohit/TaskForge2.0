@@ -7,8 +7,19 @@ interface CreateCardInput {
   description?: string;
   userId: string;
 }
-interface getCardInput{
-  listId:string;
+interface getCardsInput {
+  listId: string;
+  userId: string;
+}
+interface getCardInput {
+  cardId: string;
+  userId: string;
+}
+interface UpdateCardInput {
+  cardId: string;
+  userId: string;
+  title?: string;
+  description?: string | null;
 }
 
 export const cardService = {
@@ -72,17 +83,106 @@ export const cardService = {
       },
     });
   },
-  getcards :async ({
-    listId
-  }:getCardInput)=>{
-    const cards = await prisma.card.findMany({
-      where:{
-        listId ,
+  getcards: async ({ listId, userId }: getCardsInput) => {
+    const list = await prisma.list.findUnique({
+      where: {
+        id: listId,
       },
-      orderBy:{
-        position:"asc"
-      }
+      include: {
+        board: {
+          select: {
+            organizationId: true,
+          },
+        },
+      },
+    });
+
+    if (!list) {
+      throw new AppError("List not found", 404);
+    }
+
+    await assertOrganizationMember(list.board.organizationId, userId);
+
+    const cards = await prisma.card.findMany({
+      where: {
+        listId,
+      },
+      orderBy: {
+        position: "asc",
+      },
     });
     return cards;
-  }
+  },
+  getcardById: async ({ cardId, userId }: getCardInput) => {
+    const card = await prisma.card.findUnique({
+      where: {
+        id: cardId,
+      },
+      include: {
+        list: {
+          include: {
+            board: {
+              select: {
+                organizationId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!card) {
+      throw new AppError("Card not found", 404);
+    }
+
+    await assertOrganizationMember(card.list.board.organizationId, userId);
+
+    const { list, ...cardData } = card;
+    return cardData;
+  },
+  updateCard: async ({
+    cardId,
+    userId,
+    title,
+    description,
+  }: UpdateCardInput) => {
+    const card = await cardService.getcardById({ cardId, userId });
+
+    return prisma.card.update({
+      where: {
+        id: card.id,
+      },
+      data: {
+        ...(title !== undefined && { title }),
+        ...(description !== undefined && { description }),
+      },
+    });
+  },
+  deleteCard: async ({ cardId, userId }: getCardInput) => {
+    const card = await cardService.getcardById({ cardId, userId });
+
+    await prisma.card.delete({
+      where: {
+        id: card.id,
+      },
+    });
+  },
 };
+
+async function assertOrganizationMember(
+  organizationId: string,
+  userId: string,
+) {
+  const membership = await prisma.organizationMember.findUnique({
+    where: {
+      organizationId_userId: {
+        organizationId,
+        userId,
+      },
+    },
+  });
+
+  if (!membership) {
+    throw new AppError("You do not have access to this card", 403);
+  }
+}

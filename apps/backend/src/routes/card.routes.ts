@@ -3,6 +3,8 @@ import { authMiddleware } from "../middleware/auth.middleware";
 import { cardController } from "../controller/card.controller";
 const router = Router();
 router.post("/lists/:listId/cards", authMiddleware, cardController.createCard);
-router.get("/lists/:listId/cards" ,authMiddleware , cardController.getcard);
-
+router.get("/lists/:listId/cards", authMiddleware, cardController.getcard);
+router.get("/cards/:cardId", authMiddleware, cardController.getCardById);
+router.patch("/cards/:cardId", authMiddleware, cardController.updateCard);
+router.delete("/cards/:cardId", authMiddleware, cardController.deleteCard);
 export default router;

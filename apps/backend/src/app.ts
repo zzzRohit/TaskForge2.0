@@ -20,7 +20,7 @@ app.use("/organization", orgainizationRoutes);
 app.use("/auth", authRouter);
 app.use("/organization", boardRoutes);
 app.use("/organization", listRoutes);
-app.use("/",cardRoutes )
+app.use("/",cardRoutes );
 app.use(errorHandler);
 app.get("/api/health", (_request, response) => {
   response.json({ status: "ok" });
