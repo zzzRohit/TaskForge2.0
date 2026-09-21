@@ -15,7 +15,11 @@ function FieldShell({ children, error, label }: FieldShellProps) {
     <label className="block">
       <span className="mb-2 block text-sm font-medium text-ink">{label}</span>
       {children}
-      {error ? <span className="mt-2 block text-xs text-danger">{error}</span> : null}
+      {error ? (
+        <span className="mt-2 block text-xs font-medium text-danger">
+          {error}
+        </span>
+      ) : null}
     </label>
   );
 }
@@ -28,7 +32,7 @@ export function Input({
   return (
     <FieldShell error={error} label={label}>
       <input
-        className={`h-10 w-full rounded-[var(--r)] border bg-surface px-3 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-accent ${
+        className={`h-10 w-full rounded-[var(--r)] border bg-surface px-3 text-sm text-ink shadow-[var(--shadow-sm)] outline-none placeholder:text-ink-3 hover:border-line-strong focus:border-accent disabled:cursor-not-allowed disabled:bg-surface-raised disabled:text-ink-3 ${
           error ? "border-danger" : "border-line"
         }`}
         {...props}
@@ -48,7 +52,7 @@ export function Textarea({
   return (
     <FieldShell error={error} label={label}>
       <textarea
-        className={`min-h-24 w-full resize-none rounded-[var(--r)] border bg-surface px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-accent ${
+        className={`min-h-24 w-full resize-none rounded-[var(--r)] border bg-surface px-3 py-2 text-sm text-ink shadow-[var(--shadow-sm)] outline-none placeholder:text-ink-3 hover:border-line-strong focus:border-accent disabled:cursor-not-allowed disabled:bg-surface-raised disabled:text-ink-3 ${
           error ? "border-danger" : "border-line"
         }`}
         {...props}

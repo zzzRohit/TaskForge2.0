@@ -38,10 +38,10 @@ export function Modal({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/20 px-4 py-6 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/30 px-4 py-6 backdrop-blur-[2px] sm:items-center"
       role="dialog"
     >
-      <div className="w-full max-w-[440px] rounded-[var(--r-dialog)] border border-line bg-surface shadow-[0_18px_55px_rgba(19,18,17,0.13)]">
+      <div className="w-full max-w-[460px] rounded-[var(--r-dialog)] border border-line bg-surface shadow-[var(--shadow-md)]">
         <div className="border-b border-line px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -52,11 +52,11 @@ export function Modal({
             </div>
             <Button
               aria-label="Close dialog"
-              className="h-8 px-2"
+              className="h-8 px-2 text-base"
               onClick={onClose}
               variant="ghost"
             >
-              X
+              x
             </Button>
           </div>
         </div>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Geist:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "inverse-surface": "#2f3038", "destructive-wash": "#fee2e2", "surface-container-high": "#e8e7f1", "on-tertiary-container": "#7671ff", "role-admin-bg": "#e0e7ff", "role-member-fg": "#52525b", "tertiary-fixed": "#e2dfff", "error-container": "#ffdad6", "inverse-on-surface": "#f1effa", "on-error-container": "#93000a", "on-primary-container": "#858387", "on-primary-fixed": "#1b1b1e", "border-subtle": "#e4e4e7", "surface-tint": "#5f5e61", "on-secondary-container": "#616364", "on-surface-variant": "#47464b", "on-secondary-fixed-variant": "#454748", "on-primary-fixed-variant": "#47464a", "error": "#ba1a1a", "on-tertiary-fixed": "#0f0069", "surface-container-highest": "#e3e1ec", "secondary-fixed": "#e2e2e3", "role-owner-bg": "#fef3c7", "surface-container-low": "#f4f2fd", "primary": "#000000", "on-surface": "#1a1b22", "outline-variant": "#c8c5cb", "canvas-bg": "#fafafa", "on-secondary-fixed": "#1a1c1d", "surface-container-lowest": "#ffffff", "role-member-bg": "#f4f4f5", "on-background": "#1a1b22", "surface-variant": "#e3e1ec", "primary-fixed-dim": "#c8c5ca", "background": "#fbf8ff", "tertiary-fixed-dim": "#c3c0ff", "on-primary": "#ffffff", "primary-container": "#1b1b1e", "outline": "#77767b", "surface-bright": "#fbf8ff", "on-tertiary": "#ffffff", "tertiary": "#000000", "secondary": "#5d5e60", "secondary-container": "#dfdfe0", "surface-card": "#ffffff", "tertiary-container": "#0f0069", "secondary-fixed-dim": "#c6c6c7", "inverse-primary": "#c8c5ca", "surface-dim": "#dad9e3", "on-error": "#ffffff", "primary-fixed": "#e4e1e6", "role-owner-fg": "#92400e", "role-admin-fg": "#3730a3", "status-emerald": "#16a34a", "destructive-crimson": "#dc2626", "on-secondary": "#ffffff", "on-tertiary-fixed-variant": "#3323cc", "surface": "#fbf8ff", "surface-container": "#eeedf7" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "1rem", "space-lg": "1.5rem", "space-xl": "2.5rem", "gutter": "1rem", "space-xs": "0.25rem", "gutter-desktop": "1.5rem", "margin-desktop": "2.5rem", "margin-tablet": "1.5rem", "space-sm": "0.5rem", "margin": "1rem" }, "fontFamily": { "headline-md": [ "DM Sans" ], "display-xl": [ "DM Sans" ], "body-sm": [ "DM Sans" ], "headline-sm": [ "DM Sans" ], "body-sm-medium": [ "DM Sans" ], "label-caps": [ "Geist" ], "headline-lg": [ "DM Sans" ], "display-xl-mobile": [ "DM Sans" ], "body-base": [ "DM Sans" ], "label-mono-sm": [ "Geist" ] }, "fontSize": { "headline-md": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "display-xl": [ "48px", { "lineHeight": "52px", "letterSpacing": "-0.04em", "fontWeight": "600" } ], "body-sm": [ "13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-sm-medium": [ "13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "500" } ], "label-caps": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" } ], "headline-lg": [ "28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "display-xl-mobile": [ "32px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "body-base": [ "15px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" } ], "label-mono-sm": [ "10px", { "lineHeight": "12px", "letterSpacing": "0.04em", "fontWeight": "500" } ] } } } };</script></head><body class="bg-canvas-bg font-body-base text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-card/90 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.03)]"><div class="h-14 w-full px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><a class="flex items-center gap-space-sm" href="#"><img alt="TaskForge Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VZlJGro20Ptklxz6M5xYL1kumeLeyfR_7lHrRS5y8MG5f4-vJ0cvueFW1AiFc4YzsIwF-XHnnUi_d90a7OfP8cuiOaWX8ZaY-gt4ZYF4lJCtVszLeEbO3tlPjWWSWhnBbT_8CNxVXTzVo7m3y4u0nLt9-He5VZbof3Ss_mhsHom9L60pgQWKp7WCeE6GGtoxhqLZOZ7Ox4ZqK791L8B5wa6nNjKVzoPPcLS45JOqVkg-2C2spnGBc5tGY3"/><span class="font-headline-sm text-headline-sm tracking-tight text-primary">TaskForge</span></a><div class="h-4 w-px bg-border-subtle"></div><button class="flex items-center gap-space-xs px-space-sm py-1 rounded bg-role-member-bg text-on-surface hover:bg-surface-container-high transition-colors text-left" type="button"><span class="font-body-sm-medium text-body-sm-medium truncate max-w-[140px]">Engineering Team</span><span class="material-symbols-outlined text-on-surface-variant text-[18px]">unfold_more</span></button><nav class="flex items-center gap-space-xs ml-space-xs" data-active-classes="bg-primary text-on-primary font-body-sm-medium text-body-sm-medium"><a class="px-3 py-1.5 rounded-md font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface hover:bg-role-member-bg transition-colors" data-path="organizations" href="#">Organizations</a><a class="px-3 py-1.5 rounded-md font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface hover:bg-role-member-bg transition-colors" data-path="boards" href="#">Boards</a></nav></div><div class="flex-1 max-w-md hidden md:flex items-center"><div class="w-full flex items-center bg-role-member-bg px-space-sm py-1.5 rounded-md text-on-surface-variant"><span class="material-symbols-outlined text-[18px] text-outline mr-2">search</span><input class="w-full bg-transparent border-none outline-none font-body-sm text-body-sm text-on-surface placeholder:text-outline" placeholder="Search tasks, boards, docs... (⌘K)" type="text"/><span class="font-label-mono-sm text-label-mono-sm bg-surface-card px-1.5 py-0.5 rounded text-outline">⌘K</span></div></div><div class="flex items-center gap-space-sm"><button class="p-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-role-member-bg transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span></button><div class="flex items-center gap-space-sm pl-space-xs"><div class="flex items-center gap-space-sm cursor-pointer p-1 rounded-md hover:bg-role-member-bg transition-colors"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBomaE9ClEzvq4c6jVwnVEM4FH2nNZBOrujl9UvvbZ_hIkeN2OGkwHZVn9YohNSigwkbmgS4lTwG_UyQDhy2mYrvz_HIDJiFDH2nIvHvb6ATNOFNixjDWng_RVV6P9OMRpKxxc6MrnDNFjmimdRurBvpmiy5PE92kHif4YZmSPggTcLVxJ07nc2UadFIcWsZws6cHQHYVcOYQLDb_fBL-hNJ02m-ZX21Q4oZyfT4wtjdSRgunqBETL6GA"/><div class="hidden lg:flex flex-col text-left"><span class="font-body-sm-medium text-body-sm-medium leading-none text-on-surface">Alex Rivera</span><span class="font-label-caps text-label-caps text-on-surface-variant uppercase mt-0.5">Admin</span></div></div><button class="p-1.5 rounded-md text-on-surface-variant hover:text-destructive-crimson hover:bg-destructive-wash transition-colors" title="Sign out" type="button"><span class="material-symbols-outlined text-[20px]">logout</span></button></div></div></div></header><main class="w-full pt-14 bg-canvas-bg min-h-screen"><div class="flex flex-col w-full">
+<!-- Top Breadcrumb & Metadata Utility Strip -->
+<div class="w-full px-margin-tablet lg:px-margin-desktop py-space-sm bg-surface-card shadow-sm">
+<div class="max-w-screen-2xl mx-auto flex flex-wrap items-center justify-between gap-space-sm">
+<nav class="flex items-center gap-1.5 font-body-sm text-body-sm text-secondary">
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">domain</span>
+<span>Organizations</span>
+</a>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+<a class="hover:text-primary transition-colors font-body-sm-medium text-body-sm-medium text-on-surface" href="#">
+          Acme Corporation
+        </a>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Boards</a>
+<span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+<span class="font-body-sm-medium text-body-sm-medium text-primary truncate max-w-[200px] sm:max-w-xs">
+          Sprint 24 - Core Design System
+        </span>
+</nav>
+<div class="flex items-center gap-space-xs font-label-mono-sm text-label-mono-sm text-secondary bg-surface-container px-2.5 py-1 rounded">
+<span class="w-1.5 h-1.5 rounded-full bg-status-emerald animate-pulse"></span>
+<span>BOARD ID: <span class="text-on-surface font-semibold tracking-wider">BRD-8092-S24</span></span>
+</div>
+</div>
+</div>
+<!-- Board Header Studio Section -->
+<div class="w-full px-margin-tablet lg:px-margin-desktop py-space-xl">
+<div class="max-w-screen-2xl mx-auto flex flex-col gap-space-md">
+<!-- Title + Action Row -->
+<div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-space-lg">
+<div class="flex flex-col gap-space-xs max-w-3xl">
+<div class="flex items-center gap-space-sm flex-wrap">
+<span class="font-label-caps text-label-caps uppercase px-2 py-0.5 rounded bg-primary text-on-primary">
+              Active Sprint
+            </span>
+<span class="font-label-caps text-label-caps uppercase px-2.5 py-0.5 rounded-full bg-role-owner-bg text-role-owner-fg font-semibold">
+              Owner
+            </span>
+<span class="font-body-sm text-body-sm text-secondary">
+              Updated 20m ago
+            </span>
+</div>
+<h1 class="font-headline-lg text-headline-lg lg:text-display-xl text-primary tracking-tight" id="boardTitleDisplay">
+            Sprint 24 - Core Design System
+          </h1>
+<p class="font-body-base text-body-base text-secondary max-w-2xl leading-relaxed" id="boardDescriptionDisplay">
+            Refining tokens, components, and responsive app shell for v2 release across web and desktop.
+          </p>
+</div>
+<!-- Quick Board Controls -->
+<div class="flex items-center gap-space-sm self-start shrink-0">
+<button class="h-9 px-4 rounded-md bg-surface-card hover:bg-surface-container-high text-on-surface font-body-sm-medium text-body-sm-medium shadow-sm transition-all duration-150 flex items-center gap-2 active:scale-[0.98]" onclick="openEditModal()" type="button">
+<span class="material-symbols-outlined text-[17px] text-secondary">edit</span>
+<span>Edit Board</span>
+</button>
+<button class="h-9 px-3.5 rounded-md bg-surface-card hover:bg-destructive-wash text-secondary hover:text-destructive-crimson font-body-sm-medium text-body-sm-medium shadow-sm transition-all duration-150 flex items-center gap-1.5 active:scale-[0.98]" onclick="openDeleteModal()" type="button">
+<span class="material-symbols-outlined text-[17px]">delete</span>
+<span class="hidden sm:inline">Delete Board</span>
+</button>
+<button class="h-9 w-9 flex items-center justify-center rounded-md bg-surface-card hover:bg-surface-container-high text-secondary shadow-sm transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Quick Metrics Strip with SVG Data Visualization -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md pt-space-xs">
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-secondary">Scope Architecture</span>
+<span class="font-headline-md text-headline-md text-primary mt-1">4 Workflow Columns</span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">To Do • Active • Review • Shipped</span>
+</div>
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">view_column</span>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-secondary">Target Completion</span>
+<span class="font-headline-md text-headline-md text-primary mt-1">84% Readiness</span>
+<span class="font-body-sm text-body-sm text-status-emerald mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> On Track for release
+            </span>
+</div>
+<!-- Miniature Ring Metric Chart -->
+<div class="relative w-12 h-12 shrink-0">
+<svg class="w-12 h-12 -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="84, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute inset-0 flex items-center justify-center font-label-mono-sm text-label-mono-sm font-semibold text-primary">
+              84%
+            </span>
+</div>
+</div>
+<div class="bg-surface-card rounded-xl p-space-md shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-secondary">Collaborators</span>
+<span class="font-headline-md text-headline-md text-primary mt-1">Acme Core Eng</span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">8 engineers • 2 designers</span>
+</div>
+<div class="flex -space-x-2 shrink-0">
+<img class="w-8 h-8 rounded-full ring-2 ring-surface-card object-cover" data-alt="Close up photographic avatar of a creative lead designer smiling wearing black minimalist glasses in studio soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQTalPD5CW6yOqaOtcNzOAdIFK_ENTpzkYdeZLGCw-yJb5sVWzrNwwrJOTRSmliEvXMaKq5_YWQfdGgUpiIG47wJqO2GbrSqB8GBGLE1UgtKHtRHkVUzjBxQoJdPKLkbDxxYcDsw6Zd1jUizERZ1exhyIOeVkFlYc_d-9wzH2rWa2VFOJtEcjOuN_62bYRS0-dioK6YTNUeiDu5cq4OMCOpDF42-PuIGvH1K8AIKQ-PWJnwNcDFwObkA"/>
+<img class="w-8 h-8 rounded-full ring-2 ring-surface-card object-cover" data-alt="Modern headshot portrait of a systems software engineer with neutral tech workplace background with crisp warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDxs0x6JpkaMGe6_Qup81EbofkXlYJMa1-M9xUANt74xQXJKtYweanBmxl-vocdQ5PZJex77_DAOiLUNmV9Ekh7kugorPnrOX9oL18JdylGSyD5vtj1DSCOdfSSkbU_0jbfH9gh4K8A2MXzVu0OKf_BnUwhiZBkL_yy5D9cqmIt5_SLtQGuBh3-AQ2st6sYLsn0juF0_-kDd_9aRfKinfCW59gh5g_KWBGFIEWUvMYAzSeen6-buGTxA"/>
+<div class="w-8 h-8 rounded-full bg-role-admin-bg text-role-admin-fg flex items-center justify-center font-label-mono-sm text-label-mono-sm font-semibold ring-2 ring-surface-card">
+              +8
+            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Central Workspace Canvas Area -->
+<div class="w-full px-margin-tablet lg:px-margin-desktop pb-space-xl">
+<div class="max-w-screen-2xl mx-auto flex flex-col gap-space-lg">
+<!-- Notion-like Milestone Callout Banner -->
+<div class="relative overflow-hidden bg-surface-card rounded-xl p-space-lg shadow-sm">
+<div class="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
+<div class="flex flex-col sm:flex-row sm:items-start gap-space-md">
+<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[20px]">layers</span>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-headline-sm text-headline-sm text-primary">
+                Board Workspace • Lists &amp; Cards Milestone
+              </span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-semibold tracking-wider">
+                Roadmap Preview
+              </span>
+</div>
+<p class="font-body-base text-body-base text-secondary max-w-4xl">
+              Lists and task cards will be available in the next milestone. This board space is ready for list columns (<span class="text-on-surface font-medium">To Do</span>, <span class="text-on-surface font-medium">In Progress</span>, <span class="text-on-surface font-medium">Review</span>, <span class="text-on-surface font-medium">Done</span>) and interactive card management.
+            </p>
+</div>
+</div>
+</div>
+<!-- Architectural Roadmap Wireframe Columns Preview -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- Column 1 Preview: To Do -->
+<div class="bg-surface-card/60 rounded-xl p-space-md flex flex-col gap-space-md min-h-[460px] shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-outline"></span>
+<span class="font-headline-sm text-headline-sm text-primary">To Do</span>
+<span class="font-label-mono-sm text-label-mono-sm px-2 py-0.5 rounded-full bg-surface-container text-secondary">0</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">add</span>
+</div>
+<!-- Subtle Wireframe Ghost Cards -->
+<div class="flex flex-col gap-space-sm">
+<div class="p-space-md rounded-lg bg-surface-card shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-outline">Token Engine</span>
+<span class="font-label-mono-sm text-label-mono-sm text-outline">P1</span>
+</div>
+<div class="h-4 w-3/4 rounded bg-surface-container animate-pulse"></div>
+<div class="h-3 w-1/2 rounded bg-surface-container-low mt-1"></div>
+<div class="flex items-center justify-between pt-space-xs mt-2">
+<div class="w-5 h-5 rounded-full bg-surface-container"></div>
+<span class="material-symbols-outlined text-[14px] text-outline">schedule</span>
+</div>
+</div>
+<div class="p-space-md rounded-lg bg-surface-card shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-outline">Core Shell</span>
+<span class="font-label-mono-sm text-label-mono-sm text-outline">P2</span>
+</div>
+<div class="h-4 w-2/3 rounded bg-surface-container animate-pulse"></div>
+<div class="h-3 w-4/5 rounded bg-surface-container-low mt-1"></div>
+<div class="flex items-center justify-between pt-space-xs mt-2">
+<div class="w-5 h-5 rounded-full bg-surface-container"></div>
+<span class="material-symbols-outlined text-[14px] text-outline">schedule</span>
+</div>
+</div>
+<div class="py-space-md rounded-lg bg-surface-container-low flex flex-col items-center justify-center text-center p-space-sm">
+<span class="material-symbols-outlined text-outline text-[20px] mb-1">post_add</span>
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Empty Column Tray</span>
+</div>
+</div>
+</div>
+<!-- Column 2 Preview: In Progress -->
+<div class="bg-surface-card/60 rounded-xl p-space-md flex flex-col gap-space-md min-h-[460px] shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-on-tertiary-container"></span>
+<span class="font-headline-sm text-headline-sm text-primary">In Progress</span>
+<span class="font-label-mono-sm text-label-mono-sm px-2 py-0.5 rounded-full bg-surface-container text-secondary">2</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">add</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<div class="p-space-md rounded-lg bg-surface-card shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-role-admin-fg">Component Library</span>
+<span class="font-label-mono-sm text-label-mono-sm text-primary font-semibold">PR #418</span>
+</div>
+<span class="font-body-sm-medium text-body-sm-medium text-on-surface">Button tactile press micro-interactions</span>
+<p class="font-body-sm text-body-sm text-secondary">Calibrating hover elevations across light canvas backgrounds.</p>
+<div class="flex items-center justify-between pt-space-xs mt-1">
+<div class="flex -space-x-1.5">
+<div class="w-5 h-5 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-mono-sm text-[9px]">AR</div>
+</div>
+<span class="font-label-mono-sm text-label-mono-sm text-secondary">Due Oct 28</span>
+</div>
+</div>
+<div class="p-space-md rounded-lg bg-surface-card shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-secondary">Layout Engine</span>
+<span class="font-label-mono-sm text-label-mono-sm text-primary font-semibold">PR #421</span>
+</div>
+<span class="font-body-sm-medium text-body-sm-medium text-on-surface">Bento Grid responsive viewport clamps</span>
+<div class="h-3 w-3/4 rounded bg-surface-container-high mt-1"></div>
+<div class="flex items-center justify-between pt-space-xs mt-1">
+<div class="w-5 h-5 rounded-full bg-surface-container"></div>
+<span class="font-label-mono-sm text-label-mono-sm text-secondary">Due Oct 30</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 3 Preview: Review -->
+<div class="bg-surface-card/60 rounded-xl p-space-md flex flex-col gap-space-md min-h-[460px] shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-role-owner-fg"></span>
+<span class="font-headline-sm text-headline-sm text-primary">Review</span>
+<span class="font-label-mono-sm text-label-mono-sm px-2 py-0.5 rounded-full bg-surface-container text-secondary">1</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">add</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<div class="p-space-md rounded-lg bg-surface-card shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-role-owner-fg">Design Audit</span>
+<span class="font-label-mono-sm text-label-mono-sm text-secondary">STAGE 2</span>
+</div>
+<span class="font-body-sm-medium text-body-sm-medium text-on-surface">Accessibility contrast in monochromatic palettes</span>
+<div class="flex items-center gap-1.5 mt-2">
+<span class="material-symbols-outlined text-[14px] text-status-emerald">check_circle</span>
+<span class="font-body-sm text-body-sm text-secondary">3/3 approvals ready</span>
+</div>
+</div>
+<div class="py-space-xl rounded-lg bg-surface-container-low flex flex-col items-center justify-center text-center p-space-sm">
+<span class="material-symbols-outlined text-outline text-[22px] mb-1">pending_actions</span>
+<span class="font-label-caps text-label-caps text-outline uppercase tracking-wider">Awaiting Handoff</span>
+</div>
+</div>
+</div>
+<!-- Column 4 Preview: Done -->
+<div class="bg-surface-card/60 rounded-xl p-space-md flex flex-col gap-space-md min-h-[460px] shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-emerald"></span>
+<span class="font-headline-sm text-headline-sm text-primary">Done</span>
+<span class="font-label-mono-sm text-label-mono-sm px-2 py-0.5 rounded-full bg-surface-container text-secondary">4</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">add</span>
+</div>
+<div class="flex flex-col gap-space-sm opacity-75 hover:opacity-100 transition-opacity">
+<div class="p-space-md rounded-lg bg-surface-card shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-status-emerald font-semibold">Shipped</span>
+<span class="material-symbols-outlined text-[16px] text-status-emerald">done_all</span>
+</div>
+<span class="font-body-sm-medium text-body-sm-medium line-through text-secondary">Design token typography classes sync</span>
+<span class="font-label-mono-sm text-label-mono-sm text-outline">Closed by Alex Rivera</span>
+</div>
+<div class="p-space-md rounded-lg bg-surface-card shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-status-emerald font-semibold">Shipped</span>
+<span class="material-symbols-outlined text-[16px] text-status-emerald">done_all</span>
+</div>
+<span class="font-body-sm-medium text-body-sm-medium line-through text-secondary">Zero-border structural framework base</span>
+<span class="font-label-mono-sm text-label-mono-sm text-outline">Merged to main</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tactile Architectural Visual Canvas Accent -->
+<div class="w-full bg-surface-card rounded-2xl p-space-lg shadow-sm flex flex-col md:flex-row items-center justify-between gap-space-lg">
+<div class="flex items-center gap-space-md">
+<div class="w-14 h-14 rounded-xl bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[28px] text-primary">terminal</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps uppercase text-secondary">System Context</span>
+<h3 class="font-headline-sm text-headline-sm text-primary">Engineered for High-Velocity Product Teams</h3>
+<p class="font-body-sm text-body-sm text-secondary">Seamless real-time synchronization with GitHub issues, branch statuses, and automated pipelines.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0">
+<span class="font-label-mono-sm text-label-mono-sm text-secondary px-3 py-1.5 rounded-md bg-surface-container">
+            v2.4.0-STABLE
+          </span>
+<a class="h-9 px-4 rounded-md bg-primary text-on-primary font-body-sm-medium text-body-sm-medium flex items-center gap-2 hover:opacity-90 transition-opacity" href="#">
+<span>Read Architecture Specs</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- MODAL 1: Edit Board Dialog -->
+<div class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" id="editBoardModal">
+<!-- Backdrop -->
+<div class="absolute inset-0 bg-primary/20 backdrop-blur-sm transition-opacity" onclick="closeEditModal()"></div>
+<!-- Modal Container -->
+<div class="relative w-full max-w-lg bg-surface-card rounded-2xl shadow-xl overflow-hidden transform transition-all flex flex-col animate-in fade-in zoom-in-95 duration-200">
+<!-- Modal Header -->
+<div class="px-space-lg py-space-md bg-surface-card flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-primary">Edit Board Details</h2>
+<p class="font-body-sm text-body-sm text-secondary">Modify workspace title, mission, and scope.</p>
+</div>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-surface-container text-secondary transition-colors" onclick="closeEditModal()" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Form Body -->
+<form class="px-space-lg py-space-md flex flex-col gap-space-md" id="editBoardForm" onsubmit="handleEditSubmit(event)">
+<div class="flex flex-col gap-1.5">
+<label class="font-body-sm-medium text-body-sm-medium text-on-surface" for="boardTitleInput">
+            Board Title <span class="text-error">*</span>
+</label>
+<input class="h-10 px-3 rounded-md bg-surface-card font-body-base text-body-base text-on-surface shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline" id="boardTitleInput" placeholder="e.g. Platform Migration Q1" required="" type="text" value="Sprint 24 - Core Design System"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-body-sm-medium text-body-sm-medium text-on-surface" for="boardDescInput">
+            Board Description
+          </label>
+<textarea class="p-3 rounded-md bg-surface-card font-body-base text-body-base text-on-surface shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline resize-none" id="boardDescInput" placeholder="Outline goals, sprint targets, and milestones..." rows="3">Refining tokens, components, and responsive app shell for v2 release across web and desktop.</textarea>
+<span class="font-label-mono-sm text-label-mono-sm text-outline self-end">Max 250 characters</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container flex items-center justify-between text-secondary">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-role-owner-fg">lock_open</span>
+<span class="font-body-sm text-body-sm">Organization visibility: Acme Corporation (Internal)</span>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-outline">Default</span>
+</div>
+<!-- Action Footer -->
+<div class="pt-space-sm flex items-center justify-end gap-space-sm">
+<button class="h-9 px-4 rounded-md bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm-medium text-body-sm-medium transition-colors" onclick="closeEditModal()" type="button">
+            Cancel
+          </button>
+<button class="h-9 px-5 rounded-md bg-primary hover:opacity-90 text-on-primary font-body-sm-medium text-body-sm-medium transition-all shadow-sm active:scale-[0.98]" type="submit">
+            Save Changes
+          </button>
+</div>
+</form>
+</div>
+</div>
+<!-- MODAL 2: Delete Board Confirmation Dialog -->
+<div class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" id="deleteBoardModal">
+<!-- Backdrop -->
+<div class="absolute inset-0 bg-primary/20 backdrop-blur-sm transition-opacity" onclick="closeDeleteModal()"></div>
+<!-- Modal Container -->
+<div class="relative w-full max-w-md bg-surface-card rounded-2xl shadow-xl overflow-hidden transform transition-all flex flex-col animate-in fade-in zoom-in-95 duration-200">
+<div class="p-space-lg flex flex-col gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-destructive-wash flex items-center justify-center text-destructive-crimson shrink-0">
+<span class="material-symbols-outlined text-[22px]">warning</span>
+</div>
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-primary">Delete Board</h2>
+<span class="font-label-mono-sm text-label-mono-sm text-destructive-crimson uppercase tracking-wider font-semibold">Destructive Action</span>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-2">
+<p class="font-body-base text-body-base text-on-surface">
+            Are you sure you want to delete <strong class="text-primary font-semibold">Sprint 24 - Core Design System</strong>?
+          </p>
+<p class="font-body-sm text-body-sm text-secondary leading-relaxed">
+            This action cannot be undone and all associated board data, column schemas, and roadmap references will be permanently removed from Acme Corporation.
+          </p>
+</div>
+<!-- Action Footer -->
+<div class="flex items-center justify-end gap-space-sm pt-space-xs">
+<button class="h-9 px-4 rounded-md bg-surface-container hover:bg-surface-container-high text-on-surface font-body-sm-medium text-body-sm-medium transition-colors" onclick="closeDeleteModal()" type="button">
+            Cancel
+          </button>
+<button class="h-9 px-4 rounded-md bg-destructive-crimson hover:bg-destructive-crimson/90 text-on-primary font-body-sm-medium text-body-sm-medium shadow-sm transition-all flex items-center gap-1.5 active:scale-[0.98]" onclick="confirmDeleteBoard()" type="button">
+<span class="material-symbols-outlined text-[17px]">delete_forever</span>
+<span>Delete Board</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Toast Notification Feedback Area -->
+<div class="fixed bottom-6 right-6 z-50 hidden bg-primary text-on-primary px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2.5 transition-all" id="boardToast">
+<span class="material-symbols-outlined text-[18px] text-status-emerald" id="toastIcon">check_circle</span>
+<span class="font-body-sm-medium text-body-sm-medium" id="toastMessage">Board updated successfully</span>
+</div>
+<!-- Client-side Interactive Modal Logic -->
+<script>
+    function openEditModal() {
+      const modal = document.getElementById('editBoardModal');
+      modal.classList.remove('hidden');
+      document.getElementById('boardTitleInput').focus();
+    }
+
+    function closeEditModal() {
+      const modal = document.getElementById('editBoardModal');
+      modal.classList.add('hidden');
+    }
+
+    function openDeleteModal() {
+      const modal = document.getElementById('deleteBoardModal');
+      modal.classList.remove('hidden');
+    }
+
+    function closeDeleteModal() {
+      const modal = document.getElementById('deleteBoardModal');
+      modal.classList.add('hidden');
+    }
+
+    function handleEditSubmit(event) {
+      event.preventDefault();
+      const newTitle = document.getElementById('boardTitleInput').value.trim();
+      const newDesc = document.getElementById('boardDescInput').value.trim();
+
+      if (newTitle) {
+        document.getElementById('boardTitleDisplay').innerText = newTitle;
+        if (newDesc) {
+          document.getElementById('boardDescriptionDisplay').innerText = newDesc;
+        }
+        closeEditModal();
+        showToast('Board changes saved successfully', 'check_circle', 'text-status-emerald');
+      }
+    }
+
+    function confirmDeleteBoard() {
+      closeDeleteModal();
+      showToast('Deleting board... Redirecting to Acme Corporation', 'info', 'text-on-tertiary-container');
+      setTimeout(() => {
+        // Soft simulated navigation feedback
+        const title = document.getElementById('boardTitleDisplay');
+        if (title) {
+          title.innerText = 'Board deleted';
+          title.classList.add('opacity-40');
+        }
+      }, 1000);
+    }
+
+    function showToast(msg, icon = 'check_circle', iconColor = 'text-status-emerald') {
+      const toast = document.getElementById('boardToast');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.innerText = msg;
+      toastIcon.innerText = icon;
+      toastIcon.className = `material-symbols-outlined text-[18px] ${iconColor}`;
+
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3400);
+    }
+
+    // Keyboard support for dismiss
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeEditModal();
+        closeDeleteModal();
+      }
+    });
+  </script>
+</div></main><footer class="w-full bg-surface-card shadow-[0_-1px_6px_rgba(0,0,0,0.02)] py-space-md"><div class="w-full px-gutter-desktop flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface-variant"><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm text-primary">TaskForge</span><span class="font-body-sm text-body-sm text-outline">© 2025 TaskForge Systems. All rights reserved.</span></div><div class="flex items-center gap-space-md font-body-sm text-body-sm"><a class="hover:text-on-surface transition-colors" href="#">Changelog</a><a class="hover:text-on-surface transition-colors" href="#">Documentation</a><a class="hover:text-on-surface transition-colors" href="#">Keyboard Shortcuts</a><a class="hover:text-on-surface transition-colors" href="#">Support</a></div></div></footer></body></html>

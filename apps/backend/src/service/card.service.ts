@@ -21,6 +21,12 @@ interface UpdateCardInput {
   title?: string;
   description?: string | null;
 }
+interface moveCardInput {
+  cardId: string;
+  targetListId: string;
+  position: number;
+  userId: string;
+}
 
 export const cardService = {
   createCard: async ({
@@ -166,6 +172,51 @@ export const cardService = {
         id: card.id,
       },
     });
+  },
+  moveCard: async ({
+    cardId,
+    targetListId,
+    position,
+    userId,
+  }: moveCardInput) => {
+    const card = await prisma.card.findUnique({
+      where: {
+        id: cardId,
+      },
+      include: {
+        list: {
+          include: {
+            board: {
+              select: {
+                organizationId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!card) {
+      throw new AppError("card not found", 404);
+    }
+    const targetList = await prisma.list.findUnique({
+      where: {
+        id: targetListId,
+      },
+      include: {
+        board: {
+          select: {
+            organizationId: true,
+          },
+        },
+      },
+    });
+    if (!targetList) {
+      throw new AppError("Target list not found ", 404);
+    }
+    await assertOrganizationMember(card.list.board.organizationId, userId);
+    if (targetList.board.organizationId !== card.list.board.organizationId) {
+      throw new AppError("Invalid target list", 400);
+    }
   },
 };
 

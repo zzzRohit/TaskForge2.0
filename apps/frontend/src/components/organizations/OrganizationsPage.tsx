@@ -1,78 +1,192 @@
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { organizations as initialOrganizations } from "../../data/mock/taskforge";
 import { initials } from "../../lib/format";
 import type { MockOrganization } from "../../types/taskforge";
-import { AppShell, PageContainer } from "../layout/AppShell";
-import { Badge } from "../ui/Badge";
-import { Button } from "../ui/Button";
-import { Input } from "../ui/Field";
-import { Modal } from "../ui/Modal";
-import { EmptyState, ErrorState, SkeletonGrid } from "../ui/States";
+import { AppShell, Icon, PageContainer } from "../layout/AppShell";
+
+type ViewState = "populated" | "modal" | "loading" | "empty" | "error";
 
 export function OrganizationsPage() {
   const [organizations, setOrganizations] =
     useState<MockOrganization[]>(initialOrganizations);
+  const [viewState, setViewState] = useState<ViewState>("populated");
+  const [query, setQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isLoading] = useState(false);
-  const [hasError, setHasError] = useState(false);
+
+  const visibleOrganizations = useMemo(
+    () =>
+      organizations.filter((organization) =>
+        organization.name.toLowerCase().includes(query.toLowerCase()),
+      ),
+    [organizations, query],
+  );
+
+  function openCreate() {
+    setViewState("modal");
+    setIsCreateOpen(true);
+  }
 
   return (
     <AppShell>
+      <StateBar
+        active={viewState}
+        onCreate={openCreate}
+        onSelect={(state) => setViewState(state)}
+      />
       <PageContainer>
-        <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-semibold text-ink">Organizations</h1>
-            <p className="mt-2 text-sm text-ink-2">
-              Choose a workspace to continue.
+        <section className="flex flex-col justify-between gap-6 pb-6 md:flex-row md:items-end">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-2">
+              <span>Directory</span>
+              <span className="text-ink-3">/</span>
+              <span className="text-ink">Workspaces</span>
+            </div>
+            <h1 className="mt-2 text-[28px] font-semibold leading-[34px] tracking-normal text-ink">
+              Organizations
+            </h1>
+            <p className="mt-2 text-[15px] leading-[22px] text-ink-2">
+              Workspaces and organizations you manage or collaborate in across
+              your engineering clusters.
             </p>
           </div>
-          <Button onClick={() => setIsCreateOpen(true)}>
-            Create Organization
-          </Button>
-        </div>
-
-        {isLoading ? <SkeletonGrid /> : null}
-        {hasError ? (
-          <ErrorState onRetry={() => setHasError(false)} />
-        ) : null}
-        {!isLoading && !hasError && organizations.length === 0 ? (
-          <EmptyState
-            action={() => setIsCreateOpen(true)}
-            message="Create your first workspace to get started."
-            title="No organizations yet."
-          />
-        ) : null}
-        {!isLoading && !hasError && organizations.length > 0 ? (
-          <div className="grid gap-3">
-            {organizations.map((organization) => (
-              <OrganizationCard
-                key={organization.id}
-                organization={organization}
+          <div className="flex items-center gap-2">
+            <div className="relative hidden sm:block">
+              <Icon className="absolute left-3 top-2.5 text-[18px] text-ink-3">
+                filter_list
+              </Icon>
+              <input
+                className="h-9 rounded-md bg-surface pl-9 pr-3 text-[13px] text-ink shadow-sm outline-none placeholder:text-ink-3"
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Filter workspaces..."
+                value={query}
               />
-            ))}
+            </div>
+            <button
+              className="flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-[13px] font-medium text-accent-fg shadow-sm hover:bg-[var(--accent-hover)]"
+              onClick={openCreate}
+              type="button"
+            >
+              <Icon className="text-[18px]">add</Icon>
+              Create Organization
+            </button>
           </div>
+        </section>
+
+        {viewState === "loading" ? <OrganizationSkeleton /> : null}
+        {viewState === "empty" ? <OrganizationEmpty onCreate={openCreate} /> : null}
+        {viewState === "error" ? (
+          <OrganizationError onRetry={() => setViewState("populated")} />
+        ) : null}
+        {viewState === "populated" || viewState === "modal" ? (
+          <section className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {visibleOrganizations.map((organization) => (
+                <OrganizationCard
+                  key={organization.id}
+                  organization={organization}
+                />
+              ))}
+            </div>
+            <div className="flex flex-col items-center justify-between gap-4 rounded-xl bg-[var(--surface-container-low)] p-6 shadow-sm md:flex-row">
+              <div className="flex items-center gap-4">
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-surface text-accent shadow-sm">
+                  <Icon>corporate_fare</Icon>
+                </span>
+                <div>
+                  <h2 className="text-base font-semibold text-ink">
+                    Looking to consolidate multiple teams?
+                  </h2>
+                  <p className="text-[13px] text-ink-2">
+                    TaskForge Enterprise supports unified SSO, audit trails,
+                    and multi-tenant billing.
+                  </p>
+                </div>
+              </div>
+              <button
+                className="rounded-md bg-surface px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-[var(--surface-container-high)]"
+                type="button"
+              >
+                Explore Enterprise features
+              </button>
+            </div>
+          </section>
         ) : null}
       </PageContainer>
       <CreateOrganizationDialog
         isOpen={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
-        onCreate={(name) => {
+        onClose={() => {
+          setIsCreateOpen(false);
+          setViewState("populated");
+        }}
+        onCreate={(name, slug) => {
           setOrganizations((current) => [
             ...current,
             {
-              id: name.toLowerCase().replaceAll(" ", "-"),
+              activityLabel: "Last active just now",
+              boards: 0,
+              code: `org_${slug.slice(0, 8)}`,
+              createdAt: new Date().toISOString(),
+              description:
+                "A private workspace for your team to build, triage, and ship software.",
+              healthLabel: "Workspace Setup",
+              healthPercent: 12,
+              id: slug,
+              memberAvatars: [],
+              members: 1,
               name,
               role: "OWNER",
-              members: 1,
-              boards: 0,
-              createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             },
           ]);
         }}
       />
     </AppShell>
+  );
+}
+
+function StateBar({
+  active,
+  onCreate,
+  onSelect,
+}: {
+  active: ViewState;
+  onCreate: () => void;
+  onSelect: (state: ViewState) => void;
+}) {
+  const states: Array<{ label: string; value: ViewState }> = [
+    { label: "Populated list", value: "populated" },
+    { label: "Create Modal", value: "modal" },
+    { label: "Skeleton", value: "loading" },
+    { label: "Empty", value: "empty" },
+    { label: "Error", value: "error" },
+  ];
+
+  return (
+    <aside className="flex w-full flex-col justify-between gap-3 bg-[var(--surface-container-low)] px-4 py-2.5 shadow-sm lg:flex-row lg:items-center lg:px-6">
+      <div className="flex items-center gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-ink-2 shadow-sm">
+          <span className="h-1.5 w-1.5 rounded-full bg-success" />
+          Workspace Route /organizations
+        </span>
+      </div>
+      <div className="flex w-full gap-1 overflow-x-auto rounded-lg bg-surface p-1 shadow-sm lg:w-auto">
+        {states.map((state) => (
+          <button
+            className={`shrink-0 rounded px-2.5 py-1 text-[13px] font-medium ${
+              active === state.value
+                ? "bg-accent text-accent-fg"
+                : "text-ink-2 hover:bg-surface-raised hover:text-ink"
+            }`}
+            key={state.value}
+            onClick={() => (state.value === "modal" ? onCreate() : onSelect(state.value))}
+            type="button"
+          >
+            {state.label}
+          </button>
+        ))}
+      </div>
+    </aside>
   );
 }
 
@@ -83,27 +197,158 @@ function OrganizationCard({
 }) {
   return (
     <Link
-      className="group flex items-center justify-between gap-4 rounded-[var(--r-lg)] border border-line bg-surface px-4 py-4 hover:border-line-strong hover:bg-surface-raised"
+      className="group flex min-h-[230px] flex-col justify-between rounded-xl bg-surface p-6 shadow-sm hover:shadow-md"
       to={`/organizations/${organization.id}/boards`}
     >
-      <div className="flex min-w-0 items-center gap-4">
-        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--r-lg)] border border-line bg-surface-raised font-semibold text-accent">
-          {initials(organization.name)}
-        </span>
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="truncate text-base font-semibold text-ink">
-              {organization.name}
-            </h2>
-            <Badge>{organization.role}</Badge>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-[var(--surface-container-high)] text-base font-semibold text-accent shadow-inner group-hover:bg-accent group-hover:text-accent-fg">
+              {initials(organization.name)}
+            </span>
+            <div className="min-w-0">
+              <h2 className="truncate text-base font-semibold text-ink">
+                {organization.name}
+              </h2>
+              <span className="font-mono text-[10px] uppercase tracking-[0.04em] text-ink-3">
+                {organization.code}
+              </span>
+            </div>
           </div>
-          <p className="mt-1 text-sm text-ink-2">
-            {organization.members} members · {organization.boards} boards
-          </p>
+          <RolePill role={organization.role} />
+        </div>
+        <p className="line-clamp-2 text-[13px] leading-[18px] text-ink-2">
+          {organization.description}
+        </p>
+        <div className="space-y-1.5 py-1">
+          <div className="flex justify-between font-mono text-[10px] font-medium text-ink-2">
+            <span>{organization.healthLabel}</span>
+            <span className="text-success">{organization.healthPercent + 8}% on track</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-[var(--surface-container-high)]">
+            <div
+              className="h-full rounded-full bg-accent"
+              style={{ width: `${organization.healthPercent}%` }}
+            />
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-4 text-[13px] text-ink-2">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1.5">
+              <Icon className="text-[16px] text-ink-3">group</Icon>
+              <strong className="font-medium text-ink">{organization.members}</strong>
+              Members
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Icon className="text-[16px] text-ink-3">dashboard</Icon>
+              <strong className="font-medium text-ink">{organization.boards}</strong>
+              Boards
+            </span>
+          </div>
+          <AvatarPile avatars={organization.memberAvatars} extra={organization.members - 2} />
         </div>
       </div>
-      <span className="text-lg text-ink-3 group-hover:text-ink">→</span>
+      <div className="mt-6 flex items-center justify-between pt-2 text-ink-2">
+        <span className="flex items-center gap-1 text-[13px]">
+          <span className="h-1.5 w-1.5 rounded-full bg-success" />
+          {organization.activityLabel}
+        </span>
+        <Icon className="text-ink-2 group-hover:translate-x-1 group-hover:text-accent">
+          arrow_forward
+        </Icon>
+      </div>
     </Link>
+  );
+}
+
+function RolePill({ role }: { role: MockOrganization["role"] }) {
+  const className =
+    role === "OWNER"
+      ? "bg-[var(--role-owner-bg)] text-[var(--role-owner-fg)]"
+      : role === "ADMIN"
+        ? "bg-[var(--role-admin-bg)] text-[var(--role-admin-fg)]"
+        : "bg-surface-raised text-ink-2";
+
+  return (
+    <span className={`rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] shadow-sm ${className}`}>
+      {role.toLowerCase()}
+    </span>
+  );
+}
+
+function AvatarPile({ avatars, extra }: { avatars: string[]; extra: number }) {
+  return (
+    <div className="hidden -space-x-1.5 overflow-hidden sm:flex">
+      {avatars.slice(0, 2).map((avatar) => (
+        <img
+          alt=""
+          className="h-6 w-6 rounded-full object-cover ring-2 ring-surface"
+          key={avatar}
+          src={avatar}
+        />
+      ))}
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--surface-container-highest)] font-mono text-[10px] text-ink ring-2 ring-surface">
+        +{Math.max(extra, 0)}
+      </span>
+    </div>
+  );
+}
+
+function OrganizationSkeleton() {
+  return (
+    <div className="grid animate-pulse grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {[1, 2, 3].map((item) => (
+        <div className="h-[230px] rounded-xl bg-surface p-6 shadow-sm" key={item}>
+          <div className="flex justify-between">
+            <div className="flex gap-3">
+              <div className="h-11 w-11 rounded-lg bg-[var(--surface-container-highest)]" />
+              <div className="space-y-2">
+                <div className="h-4 w-32 rounded bg-[var(--surface-container-highest)]" />
+                <div className="h-3 w-20 rounded bg-[var(--surface-container-high)]" />
+              </div>
+            </div>
+            <div className="h-5 w-14 rounded-full bg-[var(--surface-container-high)]" />
+          </div>
+          <div className="mt-6 h-3 rounded bg-[var(--surface-container-high)]" />
+          <div className="mt-2 h-3 w-3/4 rounded bg-[var(--surface-container-high)]" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function OrganizationEmpty({ onCreate }: { onCreate: () => void }) {
+  return (
+    <section className="flex flex-col items-center justify-center px-4 py-20 text-center">
+      <span className="grid h-16 w-16 place-items-center rounded-2xl bg-[var(--surface-container-high)] text-ink-2 shadow-inner">
+        <Icon className="text-[32px]">folder_off</Icon>
+      </span>
+      <h2 className="mt-4 text-xl font-semibold text-ink">No organizations found</h2>
+      <p className="mt-2 max-w-md text-[15px] text-ink-2">
+        You are not a member of any workspace yet. Create your first workspace
+        to organize engineering boards, track issues, and invite team members.
+      </p>
+      <button className="mt-6 flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-accent-fg" onClick={onCreate} type="button">
+        <Icon className="text-[18px]">add</Icon>Create your first workspace
+      </button>
+    </section>
+  );
+}
+
+function OrganizationError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <section className="flex flex-col items-center justify-center px-4 py-20 text-center">
+      <span className="grid h-16 w-16 place-items-center rounded-2xl bg-[var(--destructive-wash)] text-danger shadow-sm">
+        <Icon className="text-[32px]">sync_problem</Icon>
+      </span>
+      <h2 className="mt-4 text-xl font-semibold text-ink">Unable to load organizations</h2>
+      <p className="mt-2 max-w-md text-[15px] text-ink-2">
+        An error occurred while establishing connection with the workspace registry.
+      </p>
+      <button className="mt-6 flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-accent-fg" onClick={onRetry} type="button">
+        <Icon className="text-[18px]">refresh</Icon>Retry request
+      </button>
+    </section>
   );
 }
 
@@ -114,49 +359,72 @@ function CreateOrganizationDialog({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (name: string) => void;
+  onCreate: (name: string, slug: string) => void;
 }) {
-  const [name, setName] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState("Acme Design Lab");
+  const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "workspace";
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    if (name.trim().length < 2) {
-      setError("Organization name is required.");
-      return;
-    }
-
-    setError("");
-    setIsLoading(true);
-    window.setTimeout(() => {
-      onCreate(name.trim());
-      setName("");
-      setIsLoading(false);
-      onClose();
-    }, 500);
+    onCreate(name.trim(), slug);
+    onClose();
   }
 
+  if (!isOpen) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create Organization">
-      <form className="space-y-5" onSubmit={handleSubmit}>
-        <Input
-          error={error}
-          label="Organization name"
-          onChange={(event) => setName(event.target.value)}
-          placeholder="Design Studio"
-          value={name}
-        />
-        <div className="flex justify-end gap-2">
-          <Button onClick={onClose} variant="secondary">
-            Cancel
-          </Button>
-          <Button isLoading={isLoading} type="submit">
-            Create
-          </Button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--accent-hover)]/30 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md overflow-hidden rounded-xl bg-surface shadow-xl">
+        <div className="flex items-start justify-between px-6 pb-4 pt-6">
+          <div>
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+              Workspace Setup
+            </span>
+            <h2 className="mt-1 text-xl font-semibold text-ink">Create Organization</h2>
+            <p className="mt-1 text-[13px] text-ink-2">
+              Set up a space for your team to build, triage, and ship software.
+            </p>
+          </div>
+          <button className="rounded-md p-1 text-ink-2 hover:bg-surface-raised hover:text-ink" onClick={onClose} type="button">
+            <Icon>close</Icon>
+          </button>
         </div>
-      </form>
-    </Modal>
+        <form className="flex flex-col gap-4 px-6 pb-6 pt-2" onSubmit={handleSubmit}>
+          <label className="flex flex-col gap-1.5">
+            <span className="flex justify-between text-[13px] font-medium text-ink">
+              Organization Name <span className="font-mono text-[10px] uppercase text-ink-3">Required</span>
+            </span>
+            <input className="h-9 rounded-md bg-surface px-3 text-[13px] text-ink shadow-sm outline-none focus:ring-2 focus:ring-accent/20" onChange={(event) => setName(event.target.value)} value={name} />
+          </label>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[13px] font-medium text-ink">Organization URL</span>
+            <span className="flex h-9 items-center rounded-md bg-surface-raised px-3 text-[13px] shadow-inner">
+              <span className="text-ink-3">taskforge.io/</span>
+              <input className="w-full bg-transparent pl-1 outline-none" readOnly value={slug} />
+            </span>
+            <span className="font-mono text-[10px] text-ink-2">
+              Can be updated later in organization settings.
+            </span>
+          </label>
+          <div className="flex items-start gap-3 rounded-lg bg-[var(--surface-container-low)] p-3">
+            <Icon className="mt-0.5 text-accent">lock</Icon>
+            <div>
+              <p className="text-[13px] font-medium text-ink">Private workspace</p>
+              <p className="text-[13px] text-ink-2">
+                Only invited members will have access to repositories and boards.
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <button className="h-9 rounded-md bg-surface-raised px-4 text-sm font-medium text-ink hover:bg-[var(--surface-container-high)]" onClick={onClose} type="button">
+              Cancel
+            </button>
+            <button className="h-9 rounded-md bg-accent px-4 text-sm font-medium text-accent-fg hover:bg-[var(--accent-hover)]" type="submit">
+              Create Organization
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_blank" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Geist:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "inverse-surface": "#2f3038", "destructive-wash": "#fee2e2", "surface-container-high": "#e8e7f1", "on-tertiary-container": "#7671ff", "role-admin-bg": "#e0e7ff", "role-member-fg": "#52525b", "tertiary-fixed": "#e2dfff", "error-container": "#ffdad6", "inverse-on-surface": "#f1effa", "on-error-container": "#93000a", "on-primary-container": "#858387", "on-primary-fixed": "#1b1b1e", "border-subtle": "#e4e4e7", "surface-tint": "#5f5e61", "on-secondary-container": "#616364", "on-surface-variant": "#47464b", "on-secondary-fixed-variant": "#454748", "on-primary-fixed-variant": "#47464a", "error": "#ba1a1a", "on-tertiary-fixed": "#0f0069", "surface-container-highest": "#e3e1ec", "secondary-fixed": "#e2e2e3", "role-owner-bg": "#fef3c7", "surface-container-low": "#f4f2fd", "primary": "#000000", "on-surface": "#1a1b22", "outline-variant": "#c8c5cb", "canvas-bg": "#fafafa", "on-secondary-fixed": "#1a1c1d", "surface-container-lowest": "#ffffff", "role-member-bg": "#f4f4f5", "on-background": "#1a1b22", "surface-variant": "#e3e1ec", "primary-fixed-dim": "#c8c5ca", "background": "#fbf8ff", "tertiary-fixed-dim": "#c3c0ff", "on-primary": "#ffffff", "primary-container": "#1b1b1e", "outline": "#77767b", "surface-bright": "#fbf8ff", "on-tertiary": "#ffffff", "tertiary": "#000000", "secondary": "#5d5e60", "secondary-container": "#dfdfe0", "surface-card": "#ffffff", "tertiary-container": "#0f0069", "secondary-fixed-dim": "#c6c6c7", "inverse-primary": "#c8c5ca", "surface-dim": "#dad9e3", "on-error": "#ffffff", "primary-fixed": "#e4e1e6", "role-owner-fg": "#92400e", "role-admin-fg": "#3730a3", "status-emerald": "#16a34a", "destructive-crimson": "#dc2626", "on-secondary": "#ffffff", "on-tertiary-fixed-variant": "#3323cc", "surface": "#fbf8ff", "surface-container": "#eeedf7" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-md": "1rem", "space-lg": "1.5rem", "space-xl": "2.5rem", "gutter": "1rem", "space-xs": "0.25rem", "gutter-desktop": "1.5rem", "margin-desktop": "2.5rem", "margin-tablet": "1.5rem", "space-sm": "0.5rem", "margin": "1rem" }, "fontFamily": { "headline-md": [ "DM Sans" ], "display-xl": [ "DM Sans" ], "body-sm": [ "DM Sans" ], "headline-sm": [ "DM Sans" ], "body-sm-medium": [ "DM Sans" ], "label-caps": [ "Geist" ], "headline-lg": [ "DM Sans" ], "display-xl-mobile": [ "DM Sans" ], "body-base": [ "DM Sans" ], "label-mono-sm": [ "Geist" ] }, "fontSize": { "headline-md": [ "20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "display-xl": [ "48px", { "lineHeight": "52px", "letterSpacing": "-0.04em", "fontWeight": "600" } ], "body-sm": [ "13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-sm": [ "16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-sm-medium": [ "13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "500" } ], "label-caps": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.08em", "fontWeight": "600" } ], "headline-lg": [ "28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "display-xl-mobile": [ "32px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "body-base": [ "15px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" } ], "label-mono-sm": [ "10px", { "lineHeight": "12px", "letterSpacing": "0.04em", "fontWeight": "500" } ] } } } };</script></head><body class="bg-canvas-bg font-body-base text-on-surface antialiased min-h-screen flex flex-col justify-center items-center"><main class="w-full"><div class="flex flex-col w-full items-center justify-center py-10 px-4 sm:px-6">
+<!-- Interactive State Controller Pills -->
+<div class="mb-8 p-1.5 bg-surface-container-low rounded-full shadow-sm flex flex-wrap items-center justify-center gap-1.5">
+<button class="state-pill px-3 py-1 rounded-full font-label-caps text-label-caps text-on-surface bg-surface-container-lowest shadow-sm transition-all duration-150 flex items-center gap-1.5" id="btn-state-default" onclick="setScreenState('default')" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-status-emerald"></span>
+      DEFAULT
+    </button>
+<button class="state-pill px-3 py-1 rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-all duration-150 flex items-center gap-1.5" id="btn-state-error" onclick="setScreenState('error')" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-destructive-crimson"></span>
+      VALIDATION ERROR
+    </button>
+<button class="state-pill px-3 py-1 rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-all duration-150 flex items-center gap-1.5" id="btn-state-loading" onclick="setScreenState('loading')" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container animate-ping"></span>
+      LOADING
+    </button>
+<button class="state-pill px-3 py-1 rounded-full font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-all duration-150 flex items-center gap-1.5" id="btn-state-success" onclick="setScreenState('success')" type="button">
+<span class="material-symbols-outlined text-[13px] text-status-emerald">check_circle</span>
+      SUCCESS
+    </button>
+</div>
+<!-- Main Card Container -->
+<div class="w-full max-w-[440px] bg-surface-container-lowest rounded-xl shadow-xl p-8 sm:p-10 relative transition-all duration-200">
+<!-- Success Banner (Conditional) -->
+<div class="hidden mb-6 p-4 rounded-lg bg-surface-container-low text-on-surface flex items-start gap-3 transition-all" id="banner-success">
+<div class="w-6 h-6 rounded-full bg-status-emerald/15 text-status-emerald flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div class="flex-1">
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Account created successfully</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Verification link dispatched to <span class="font-body-sm-medium text-on-surface">sarah@taskforge.dev</span>. Check your inbox.</p>
+</div>
+</div>
+<!-- Brand Header -->
+<div class="flex flex-col items-center text-center mb-8">
+<div class="w-12 h-12 rounded-xl bg-inverse-surface flex items-center justify-center shadow-md mb-5 group cursor-default">
+<svg class="w-6 h-6 text-inverse-on-surface" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<rect fill="currentColor" fill-opacity="0.9" height="7" rx="1.5" width="7" x="3" y="3"></rect>
+<rect fill="currentColor" fill-opacity="0.4" height="7" rx="1.5" width="7" x="14" y="3"></rect>
+<rect fill="currentColor" fill-opacity="0.4" height="7" rx="1.5" width="7" x="3" y="14"></rect>
+<path d="M14 15.5C14 14.6716 14.6716 14 15.5 14H19.5C20.3284 14 21 14.6716 21 15.5V19.5C21 20.3284 20.3284 21 19.5 21H15.5C14.6716 21 14 20.3284 14 19.5V15.5Z" fill="currentColor" fill-opacity="0.95"></path>
+</svg>
+</div>
+<div class="flex items-center gap-2 mb-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded">V2.4 WORKSPACE</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Create your account</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5 max-w-[320px]">
+        Start organizing teams, boards, and workflows with precision.
+      </p>
+</div>
+<!-- Registration Form -->
+<form class="space-y-4" id="signup-form" onsubmit="event.preventDefault();">
+<!-- Full Name Field -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-on-surface-variant" for="name">FULL NAME</label>
+</div>
+<div class="relative">
+<input class="w-full h-9 px-3 bg-surface-container-low rounded-md font-body-sm text-body-sm text-on-surface outline-none transition-all placeholder:text-outline-variant focus:bg-surface-container-lowest focus:shadow-sm" id="name" placeholder="Jane Doe" type="text" value="Sarah Jenkins"/>
+</div>
+</div>
+<!-- Work Email Field -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-on-surface-variant" for="email">WORK EMAIL</label>
+<span class="font-label-mono-sm text-label-mono-sm text-on-surface-variant">SSO AVAILABLE</span>
+</div>
+<div class="relative">
+<input class="w-full h-9 px-3 bg-surface-container-low rounded-md font-body-sm text-body-sm text-on-surface outline-none transition-all placeholder:text-outline-variant focus:bg-surface-container-lowest focus:shadow-sm" id="email" placeholder="sarah@taskforge.dev" type="email" value="sarah@taskforge.dev"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-on-surface-variant" for="password">PASSWORD</label>
+<span class="font-label-mono-sm text-label-mono-sm text-status-emerald flex items-center gap-1">
+<span class="w-1 h-1 rounded-full bg-status-emerald"></span> STRONG
+          </span>
+</div>
+<div class="relative">
+<input class="w-full h-9 px-3 bg-surface-container-low rounded-md font-body-sm text-body-sm text-on-surface outline-none transition-all placeholder:text-outline-variant focus:bg-surface-container-lowest focus:shadow-sm" id="password" placeholder="Min. 8 characters" type="password" value="••••••••••••"/>
+</div>
+</div>
+<!-- Confirm Password Field -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-center">
+<label class="font-label-caps text-label-caps text-on-surface-variant" for="confirm-password">CONFIRM PASSWORD</label>
+</div>
+<div class="relative">
+<input class="w-full h-9 px-3 bg-surface-container-low rounded-md font-body-sm text-body-sm text-on-surface outline-none transition-all placeholder:text-outline-variant focus:bg-surface-container-lowest focus:shadow-sm" id="confirm-password" placeholder="Repeat password" type="password" value="••••••••••••"/>
+</div>
+<!-- Error Message Row -->
+<div class="hidden items-center gap-1.5 pt-1 text-destructive-crimson" id="error-container">
+<span class="material-symbols-outlined text-[15px]">error</span>
+<span class="font-body-sm-medium text-body-sm-medium">Passwords must match</span>
+</div>
+</div>
+<!-- Terms and Conditions Checkbox -->
+<div class="pt-2 pb-1">
+<label class="flex items-start gap-3 cursor-pointer group select-none">
+<div class="relative flex items-center justify-center mt-0.5">
+<input checked="" class="peer sr-only" id="terms" type="checkbox"/>
+<div class="w-4 h-4 rounded bg-surface-container-low transition-all peer-checked:bg-inverse-surface flex items-center justify-center">
+<svg class="w-3 h-3 text-inverse-on-surface opacity-0 peer-checked:opacity-100 transition-opacity" fill="currentColor" viewbox="0 0 16 16">
+<path clip-rule="evenodd" d="M12.416 3.376a.75.75 0 0 1 .208 1.04l-5 7.5a.75.75 0 0 1-1.154.114l-3-3a.75.75 0 0 1 1.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 0 1 1.04-.207Z" fill-rule="evenodd"></path>
+</svg>
+</div>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant group-hover:text-on-surface leading-tight">
+            I agree to the <a class="font-body-sm-medium text-body-sm-medium text-on-surface hover:underline" href="#">Terms of Service</a> and <a class="font-body-sm-medium text-body-sm-medium text-on-surface hover:underline" href="#">Privacy Policy</a>.
+          </span>
+</label>
+</div>
+<!-- Action Button -->
+<button class="w-full h-10 mt-2 bg-inverse-surface hover:opacity-90 active:scale-[0.99] text-inverse-on-surface rounded-md font-headline-sm text-headline-sm flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer" id="submit-btn" type="submit">
+<span id="btn-text">Create Account</span>
+<span class="hidden" id="btn-spinner">
+<svg class="animate-spin h-4 w-4 text-inverse-on-surface" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+<path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"></path>
+</svg>
+</span>
+</button>
+</form>
+<!-- SSO / Alternative Options -->
+<div class="mt-6 pt-5 bg-gradient-to-b from-transparent to-surface-container-low/40 -mx-8 -mb-8 px-8 pb-8 rounded-b-xl">
+<div class="flex items-center gap-3 mb-4">
+<div class="h-px bg-surface-container-high flex-1"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">OR CONTINUE WITH</span>
+<div class="h-px bg-surface-container-high flex-1"></div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="h-9 px-3 rounded-md bg-surface-container-lowest hover:bg-surface-container-low shadow-sm flex items-center justify-center gap-2 text-on-surface transition-all" type="button">
+<svg class="w-4 h-4" viewbox="0 0 24 24">
+<path d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17Z" fill="#4285F4"></path>
+<path d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z" fill="#34A853"></path>
+<path d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.17 0 9.98 0 12s.45 3.83 1.25 5.42l4.03-3.15Z" fill="#FBBC05"></path>
+<path d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z" fill="#EA4335"></path>
+</svg>
+<span class="font-body-sm-medium text-body-sm-medium">Google</span>
+</button>
+<button class="h-9 px-3 rounded-md bg-surface-container-lowest hover:bg-surface-container-low shadow-sm flex items-center justify-center gap-2 text-on-surface transition-all" type="button">
+<svg class="w-4 h-4 fill-current" viewbox="0 0 24 24">
+<path clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2Z" fill-rule="evenodd"></path>
+</svg>
+<span class="font-body-sm-medium text-body-sm-medium">GitHub</span>
+</button>
+</div>
+<!-- Bottom Switch to Login -->
+<div class="mt-5 text-center">
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Already have an account? 
+          <a class="font-body-sm-medium text-body-sm-medium text-on-surface hover:underline ml-0.5" href="#">Log in</a>
+</p>
+</div>
+</div>
+<!-- Micro Footer Assurance -->
+<div class="mt-8 flex items-center justify-center gap-4 text-on-surface-variant">
+<div class="flex items-center gap-1.5 font-label-mono-sm text-label-mono-sm">
+<span class="material-symbols-outlined text-[13px] text-status-emerald">lock</span>
+      256-BIT ENCRYPTION
+    </div>
+<span class="text-outline-variant">•</span>
+<div class="flex items-center gap-1.5 font-label-mono-sm text-label-mono-sm">
+<span class="material-symbols-outlined text-[13px] text-on-surface-variant">verified_user</span>
+      SOC-2 TYPE II
+    </div>
+<span class="text-outline-variant">•</span>
+<div class="flex items-center gap-1.5 font-label-mono-sm text-label-mono-sm">
+<span class="material-symbols-outlined text-[13px] text-on-surface-variant">bolt</span>
+      99.99% SLA
+    </div>
+</div>
+<!-- Interactive State Engine -->
+<script>
+    function setScreenState(state) {
+      const allPills = document.querySelectorAll('.state-pill');
+      allPills.forEach(p => {
+        p.classList.remove('bg-surface-container-lowest', 'shadow-sm', 'text-on-surface');
+        p.classList.add('text-on-surface-variant');
+      });
+
+      const activePill = document.getElementById('btn-state-' + state);
+      if (activePill) {
+        activePill.classList.add('bg-surface-container-lowest', 'shadow-sm', 'text-on-surface');
+        activePill.classList.remove('text-on-surface-variant');
+      }
+
+      const confirmPass = document.getElementById('confirm-password');
+      const errorMsg = document.getElementById('error-container');
+      const successBanner = document.getElementById('banner-success');
+      const submitBtn = document.getElementById('submit-btn');
+      const btnText = document.getElementById('btn-text');
+      const btnSpinner = document.getElementById('btn-spinner');
+
+      // Reset base styling
+      confirmPass.classList.remove('bg-destructive-wash/40', 'text-destructive-crimson');
+      confirmPass.classList.add('bg-surface-container-low', 'text-on-surface');
+      errorMsg.classList.add('hidden');
+      errorMsg.classList.remove('flex');
+      successBanner.classList.add('hidden');
+      btnSpinner.classList.add('hidden');
+      btnText.classList.remove('hidden');
+      submitBtn.removeAttribute('disabled');
+      submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+
+      if (state === 'default') {
+        confirmPass.value = "••••••••••••";
+      } else if (state === 'error') {
+        confirmPass.value = "•••••••••••x";
+        confirmPass.classList.remove('bg-surface-container-low', 'text-on-surface');
+        confirmPass.classList.add('bg-destructive-wash/40', 'text-destructive-crimson');
+        errorMsg.classList.remove('hidden');
+        errorMsg.classList.add('flex');
+      } else if (state === 'loading') {
+        btnText.classList.add('hidden');
+        btnSpinner.classList.remove('hidden');
+        submitBtn.setAttribute('disabled', 'true');
+        submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+      } else if (state === 'success') {
+        successBanner.classList.remove('hidden');
+      }
+    }
+  </script>
+</div></div></main></body></html>

@@ -1,10 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;1,14..32,400&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Geist:wght@100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist", ui-monospace, monospace;
 
   --color-bg: var(--bg);
   --color-surface: var(--surface);
@@ -22,28 +22,42 @@
 }
 
 :root {
-  --bg: #f5f4f1;
+  --bg: #fafafa;
   --surface: #ffffff;
-  --surface-raised: #fafaf8;
+  --surface-raised: #f4f4f5;
 
-  --ink: #131211;
-  --ink-2: #6b6963;
-  --ink-3: #a8a5a0;
+  --ink: #1a1b22;
+  --ink-2: #47464b;
+  --ink-3: #77767b;
 
-  --line: #e6e4e0;
-  --line-strong: #ccc9c4;
+  --line: #e4e4e7;
+  --line-strong: #c8c5cb;
 
-  --accent: #0c4a6e;
+  --accent: #000000;
   --accent-fg: #ffffff;
-  --accent-hover: #0e3f5e;
+  --accent-hover: #2f3038;
 
-  --danger: #991b1b;
+  --danger: #dc2626;
   --danger-fg: #ffffff;
-  --success: #166534;
+  --success: #16a34a;
+  --warning: #92400e;
+  --purple: #7671ff;
+  --surface-container: #eeedf7;
+  --surface-container-low: #f4f2fd;
+  --surface-container-high: #e8e7f1;
+  --surface-container-highest: #e3e1ec;
+  --role-owner-bg: #fef3c7;
+  --role-owner-fg: #92400e;
+  --role-admin-bg: #e0e7ff;
+  --role-admin-fg: #3730a3;
+  --destructive-wash: #fee2e2;
 
-  --r: 5px;
+  --r: 6px;
   --r-lg: 8px;
-  --r-dialog: 10px;
+  --r-dialog: 12px;
+
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 12px 28px rgba(16, 24, 40, 0.08);
 }
 
 html,
@@ -61,13 +75,28 @@ body,
 body {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.5;
   color: var(--ink);
   background: var(--bg);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.material-symbols-outlined {
+  direction: ltr;
+  display: inline-block;
+  font-family: "Material Symbols Outlined";
+  font-feature-settings: "liga";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
 }
 
 ::-webkit-scrollbar {
@@ -90,7 +119,9 @@ body {
 }
 
 * {
-  transition: none;
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 140ms;
+  transition-timing-function: ease;
 }
 
 .auth-wrap {
@@ -98,6 +129,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at center, rgba(232, 231, 241, 0.7), transparent 24rem),
+    var(--bg);
   padding: 24px;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.app-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
 }

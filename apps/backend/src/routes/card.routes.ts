@@ -7,4 +7,5 @@ router.get("/lists/:listId/cards", authMiddleware, cardController.getcard);
 router.get("/cards/:cardId", authMiddleware, cardController.getCardById);
 router.patch("/cards/:cardId", authMiddleware, cardController.updateCard);
 router.delete("/cards/:cardId", authMiddleware, cardController.deleteCard);
+router.patch("/card/:cardId/move",authMiddleware , cardController.moveCard )
 export default router;
