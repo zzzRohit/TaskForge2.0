@@ -217,6 +217,16 @@ export const cardService = {
     if (targetList.board.organizationId !== card.list.board.organizationId) {
       throw new AppError("Invalid target list", 400);
     }
+
+    return prisma.card.update({
+      where: {
+        id: cardId,
+      },
+      data: {
+        listId: targetListId,
+        position,
+      },
+    });
   },
 };
 

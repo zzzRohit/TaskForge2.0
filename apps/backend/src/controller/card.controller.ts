@@ -101,14 +101,26 @@ export const cardController = {
       next(error);
     }
   },
-  moveCard:async (
+  moveCard: async (
     req: Request<{ cardId: string }>,
     res: Response,
     next: NextFunction,
-  )=>{
-    const {cardId} = req.params;
-    const {targetListId ,position }= req.body;
-    const userId = req.userId!;
-    const move = await cardService.moveCard({cardId, targetListId , position ,userId});
-  }
+  ) => {
+    try {
+      const { cardId } = req.params;
+      const { targetListId, position } = req.body;
+      const userId = req.userId!;
+
+      const card = await cardService.moveCard({
+        cardId,
+        targetListId,
+        position,
+        userId,
+      });
+
+      return res.status(200).json(card);
+    } catch (error) {
+      next(error);
+    }
+  },
 };
