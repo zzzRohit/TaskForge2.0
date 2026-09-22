@@ -179,6 +179,7 @@ export const cardService = {
     position,
     userId,
   }: moveCardInput) => {
+    // 1. Find the card + its current organization
     const card = await prisma.card.findUnique({
       where: {
         id: cardId,
@@ -195,9 +196,12 @@ export const cardService = {
         },
       },
     });
+
     if (!card) {
-      throw new AppError("card not found", 404);
+      throw new AppError("Card not found", 404);
     }
+
+    // 2. Find the target list + its organization
     const targetList = await prisma.list.findUnique({
       where: {
         id: targetListId,
@@ -210,22 +214,119 @@ export const cardService = {
         },
       },
     });
+
     if (!targetList) {
-      throw new AppError("Target list not found ", 404);
+      throw new AppError("Target list not found", 404);
     }
+
+    // 3. Check organization membership
     await assertOrganizationMember(card.list.board.organizationId, userId);
+
+    // 4. Make sure target list belongs to same organization
     if (targetList.board.organizationId !== card.list.board.organizationId) {
       throw new AppError("Invalid target list", 400);
     }
 
-    return prisma.card.update({
-      where: {
-        id: cardId,
-      },
-      data: {
-        listId: targetListId,
-        position,
-      },
+    // 5. Don't allow negative positions
+    if (position < 0) {
+      throw new AppError("Position cannot be negative", 400);
+    }
+
+    // 6. Same-list reorder
+    if (card.listId === targetListId) {
+      return prisma.$transaction(async (tx) => {
+        const oldPosition = card.position;
+
+        // Moving UP
+        if (oldPosition > position) {
+          await tx.card.updateMany({
+            where: {
+              listId: card.listId,
+              position: {
+                gte: position,
+                lt: oldPosition,
+              },
+            },
+            data: {
+              position: {
+                increment: 1,
+              },
+            },
+          });
+        }
+
+        // Moving DOWN
+        if (oldPosition < position) {
+          await tx.card.updateMany({
+            where: {
+              listId: card.listId,
+              position: {
+                gt: oldPosition,
+                lte: position,
+              },
+            },
+            data: {
+              position: {
+                decrement: 1,
+              },
+            },
+          });
+        }
+
+        // Move the actual card
+        return tx.card.update({
+          where: {
+            id: cardId,
+          },
+          data: {
+            position,
+          },
+        });
+      });
+    }
+
+    // 7. Cross-list move
+    return prisma.$transaction(async (tx) => {
+      // Close the gap in the old list
+      await tx.card.updateMany({
+        where: {
+          listId: card.listId,
+          position: {
+            gt: card.position,
+          },
+        },
+        data: {
+          position: {
+            decrement: 1,
+          },
+        },
+      });
+
+      // Make space in the target list
+      await tx.card.updateMany({
+        where: {
+          listId: targetListId,
+          position: {
+            gte: position,
+          },
+        },
+        data: {
+          position: {
+            increment: 1,
+          },
+        },
+      });
+
+      // Move the card
+      return tx.card.update({
+        where: {
+          id: cardId,
+        },
+        data: {
+          listId: targetListId,
+          position,
+        },
+      });
     });
   },
 };
