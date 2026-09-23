@@ -16,6 +16,16 @@ export type Organization = {
   boards: number;
 };
 
+export type OrganizationMemberPreview = {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+};
+
+export type ApiOrganization = Organization & {
+  memberAvatars: OrganizationMemberPreview[];
+};
+
 export type Board = {
   id: string;
   title: string;

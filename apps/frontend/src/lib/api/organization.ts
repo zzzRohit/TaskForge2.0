@@ -1,14 +1,14 @@
 import { api } from "./client";
-import type { Organization } from "../../types/taskforge";
+import type { ApiOrganization } from "../../types/taskforge";
 
-export async function getOrganizations(): Promise<Organization[]> {
-  const response = await api.get<Organization[]>("/organization");
+export async function getOrganizations(): Promise<ApiOrganization[]> {
+  const response = await api.get<ApiOrganization[]>("/organization");
   return response.data;
 }
 
 export async function createOrganization(
   name: string,
-): Promise<Organization> {
-  const response = await api.post<Organization>("/organization", { name });
+): Promise<ApiOrganization> {
+  const response = await api.post<ApiOrganization>("/organization", { name });
   return response.data;
 }

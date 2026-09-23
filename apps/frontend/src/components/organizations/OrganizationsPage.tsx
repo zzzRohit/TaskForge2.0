@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 
-import { createOrganization, getOrganizations } from "../../lib/api/organization";
+import {
+  createOrganization,
+  getOrganizations,
+} from "../../lib/api/organization";
 import { initials } from "../../lib/format";
-import type { Organization, Role } from "../../types/taskforge";
+import type { ApiOrganization, Role } from "../../types/taskforge";
 import { AppShell, Icon, PageContainer } from "../layout/AppShell";
 
 type ViewState = "populated" | "modal" | "loading" | "empty" | "error";
 
 export function OrganizationsPage() {
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [organizations, setOrganizations] = useState<ApiOrganization[]>([]);
   const [viewState, setViewState] = useState<ViewState>("loading");
 
   useEffect(() => {
@@ -164,7 +167,7 @@ function StateBar({
   );
 }
 
-function OrganizationCard({ organization }: { organization: Organization }) {
+function OrganizationCard({ organization }: { organization: ApiOrganization }) {
   return (
     <Link
       className="group flex min-h-[210px] flex-col justify-between rounded-xl bg-surface p-6 shadow-sm hover:shadow-md"
@@ -204,6 +207,10 @@ function OrganizationCard({ organization }: { organization: Organization }) {
               Boards
             </span>
           </div>
+          <AvatarPile
+            avatars={organization.memberAvatars}
+            extra={organization.members - organization.memberAvatars.length}
+          />
         </div>
       </div>
       <div className="mt-6 flex items-center justify-between pt-2 text-ink-2">
@@ -216,6 +223,44 @@ function OrganizationCard({ organization }: { organization: Organization }) {
         </Icon>
       </div>
     </Link>
+  );
+}
+
+function AvatarPile({
+  avatars,
+  extra,
+}: {
+  avatars: ApiOrganization["memberAvatars"];
+  extra: number;
+}) {
+  if (avatars.length === 0 && extra === 0) return null;
+
+  return (
+    <div className="hidden -space-x-1.5 overflow-hidden sm:flex">
+      {avatars.map((member) =>
+        member.avatarUrl ? (
+          <img
+            alt={member.name}
+            className="h-6 w-6 rounded-full object-cover ring-2 ring-surface"
+            key={member.id}
+            src={member.avatarUrl}
+          />
+        ) : (
+          <span
+            className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--surface-container-high)] font-mono text-[9px] font-semibold text-accent ring-2 ring-surface"
+            key={member.id}
+            title={member.name}
+          >
+            {initials(member.name)}
+          </span>
+        ),
+      )}
+      {extra > 0 ? (
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--surface-container-highest)] font-mono text-[10px] text-ink ring-2 ring-surface">
+          +{extra}
+        </span>
+      ) : null}
+    </div>
   );
 }
 

@@ -61,6 +61,7 @@ export const signin = async ({ email, password }: SigninCredentials) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      avatarUrl: user.avatarUrl,
     },
   }; // Return the user object if authentication is successful
 };

@@ -39,8 +39,18 @@ export const getAllOrganizations = async (userId: string) => {
         },
       },
       members: {
-        where: { userId },
-        select: { role: true },
+        orderBy: { createdAt: "asc" },
+        select: {
+          userId: true,
+          role: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              avatarUrl: true,
+            },
+          },
+        },
       },
     },
   });
@@ -50,9 +60,23 @@ export const getAllOrganizations = async (userId: string) => {
     name: organization.name,
     createdAt: organization.createdAt,
     updatedAt: organization.updatedAt,
-    role: organization.members[0]?.role ?? "MEMBER",
+    role:
+      organization.members.find((member) => member.userId === userId)?.role ??
+      "MEMBER",
     members: organization._count.members,
     boards: organization._count.boards,
+    memberAvatars: [...organization.members]
+      .sort((firstMember, secondMember) => {
+        if (firstMember.userId === userId) return -1;
+        if (secondMember.userId === userId) return 1;
+        return 0;
+      })
+      .slice(0, 3)
+      .map((member) => ({
+        id: member.user.id,
+        name: member.user.name,
+        avatarUrl: member.user.avatarUrl,
+      })),
   }));
 };
 

@@ -1,13 +1,16 @@
 import type { ReactNode } from "react";
 import { Link, NavLink, useNavigate, useParams } from "react-router-dom";
-import { currentUser, organizations } from "../../data/mock/taskforge";
+import { organizations } from "../../data/mock/taskforge";
+import { getStoredUser, logout } from "../../lib/api/auth";
 import { initials } from "../../lib/format";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { organizationId } = useParams();
+  const currentUser = getStoredUser();
   const currentOrganization =
-    organizations.find((item) => item.id === organizationId) ?? organizations[0];
+    organizations.find((item) => item.id === organizationId) ??
+    organizations[0];
 
   return (
     <div className="min-h-full bg-bg text-ink">
@@ -35,7 +38,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <nav className="flex items-center gap-1">
               <ShellLink to="/organizations">Organizations</ShellLink>
               {currentOrganization ? (
-                <ShellLink to={`/organizations/${currentOrganization.id}/boards`}>
+                <ShellLink
+                  to={`/organizations/${currentOrganization.id}/boards`}
+                >
                   Boards
                 </ShellLink>
               ) : null}
@@ -66,7 +71,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               className="flex items-center gap-2 rounded-md p-1 text-left hover:bg-surface-raised"
               type="button"
             >
-              {currentUser.avatarUrl ? (
+              {currentUser?.avatarUrl ? (
                 <img
                   alt=""
                   className="h-8 w-8 rounded-full object-cover"
@@ -74,21 +79,25 @@ export function AppShell({ children }: { children: ReactNode }) {
                 />
               ) : (
                 <span className="grid h-8 w-8 place-items-center rounded-full bg-accent text-xs font-semibold text-accent-fg">
-                  {initials(currentUser.name)}
+                  {initials(currentUser?.name ?? "User")}
                 </span>
               )}
               <span className="hidden flex-col leading-none lg:flex">
                 <span className="text-sm font-medium text-ink">
-                  {currentUser.name}
+                  {currentUser?.name ?? "User"}
                 </span>
                 <span className="mt-1 font-mono text-[10px] uppercase text-ink-3">
-                  {currentUser.role ?? "Admin"}
+                  {currentUser?.role ?? "Member"}
                 </span>
               </span>
             </button>
             <button
               aria-label="Sign out"
               className="grid h-8 w-8 place-items-center rounded-md text-ink-2 hover:bg-[var(--destructive-wash)] hover:text-danger"
+              onClick={() => {
+                logout();
+                navigate("/login");
+              }}
               type="button"
             >
               <Icon>logout</Icon>
@@ -177,7 +186,10 @@ export function Icon({
   className?: string;
 }) {
   return (
-    <span aria-hidden="true" className={`material-symbols-outlined ${className}`}>
+    <span
+      aria-hidden="true"
+      className={`material-symbols-outlined ${className}`}
+    >
       {children}
     </span>
   );
