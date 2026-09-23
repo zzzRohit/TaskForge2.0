@@ -11,6 +11,9 @@ export type Organization = {
   name: string;
   createdAt: string;
   updatedAt: string;
+  role: Role;
+  members: number;
+  boards: number;
 };
 
 export type Board = {
@@ -32,8 +35,6 @@ export type MockOrganization = Organization & {
   description: string;
   code: string;
   activityLabel: string;
-  healthLabel: string;
-  healthPercent: number;
   memberAvatars: string[];
 };
 
@@ -42,9 +43,6 @@ export type MockBoard = Board & {
   status: string;
   statusTone: "success" | "accent" | "warning" | "muted";
   activeMembers: number;
-  taskCount: number;
-  readiness: number;
-  collaborators: string;
   memberAvatars: string[];
 };
 

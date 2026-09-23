@@ -26,8 +26,6 @@ export const organizations: MockOrganization[] = [
       "Core platform infrastructure, shared microservices, and design system operations for Acme enterprise.",
     code: "org_98412ac",
     activityLabel: "Last active 2 hours ago",
-    healthLabel: "Sprint 42 Health",
-    healthPercent: 86,
     createdAt: "2026-08-12T09:00:00.000Z",
     updatedAt: "2026-09-11T14:20:00.000Z",
     memberAvatars: [
@@ -45,8 +43,6 @@ export const organizations: MockOrganization[] = [
       "Next-generation developer productivity tooling, automated CLI orchestration, and SDK releases.",
     code: "org_77180ll",
     activityLabel: "Last active yesterday",
-    healthLabel: "Release Cycle v2.4",
-    healthPercent: 62,
     createdAt: "2026-07-03T09:00:00.000Z",
     updatedAt: "2026-09-10T12:00:00.000Z",
     memberAvatars: [
@@ -64,8 +60,6 @@ export const organizations: MockOrganization[] = [
       "Cross-disciplinary brand agency workspace managing typography systems, spatial interfaces, and user journeys.",
     code: "org_33912sh",
     activityLabel: "Last active 3 days ago",
-    healthLabel: "Design System v3.0",
-    healthPercent: 48,
     createdAt: "2026-08-27T09:00:00.000Z",
     updatedAt: "2026-09-09T18:00:00.000Z",
     memberAvatars: [
@@ -90,9 +84,6 @@ export const boards: MockBoard[] = [
     status: "Active Sprint",
     statusTone: "success",
     activeMembers: 10,
-    taskCount: 52,
-    readiness: 84,
-    collaborators: "Acme Core Eng",
     memberAvatars: [
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCQTalPD5CW6yOqaOtcNzOAdIFK_ENTpzkYdeZLGCw-yJb5sVWzrNwwrJOTRSmliEvXMaKq5_YWQfdGgUpiIG47wJqO2GbrSqB8GBGLE1UgtKHtRHkVUzjBxQoJdPKLkbDxxYcDsw6Zd1jUizERZ1exhyIOeVkFlYc_d-9wzH2rWa2VFOJtEcjOuN_62bYRS0-dioK6YTNUeiDu5cq4OMCOpDF42-PuIGvH1K8AIKQ-PWJnwNcDFwObkA",
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBDxs0x6JpkaMGe6_Qup81EbofkXlYJMa1-M9xUANt74xQXJKtYweanBmxl-vocdQ5PZJex77_DAOiLUNmV9Ekh7kugorPnrOX9oL18JdylGSyD5vtj1DSCOdfSSkbU_0jbfH9gh4K8A2MXzVu0OKf_BnUwhiZBkL_yy5D9cqmIt5_SLtQGuBh3-AQ2st6sYLsn0juF0_-kDd_9aRfKinfCW59gh5g_KWBGFIEWUvMYAzSeen6-buGTxA",
@@ -110,9 +101,6 @@ export const boards: MockBoard[] = [
     status: "API Reliability",
     statusTone: "accent",
     activeMembers: 7,
-    taskCount: 38,
-    readiness: 71,
-    collaborators: "Platform Team",
     memberAvatars: [],
   },
   {
@@ -128,9 +116,6 @@ export const boards: MockBoard[] = [
     status: "Strategic Initiative",
     statusTone: "warning",
     activeMembers: 5,
-    taskCount: 31,
-    readiness: 56,
-    collaborators: "Growth Squad",
     memberAvatars: [],
   },
   {
@@ -145,9 +130,6 @@ export const boards: MockBoard[] = [
     status: "Infrastructure",
     statusTone: "muted",
     activeMembers: 2,
-    taskCount: 21,
-    readiness: 44,
-    collaborators: "Ops",
     memberAvatars: [],
   },
   {
@@ -162,9 +144,6 @@ export const boards: MockBoard[] = [
     status: "Release Cycle",
     statusTone: "accent",
     activeMembers: 4,
-    taskCount: 18,
-    readiness: 69,
-    collaborators: "DX Team",
     memberAvatars: [],
   },
 ];

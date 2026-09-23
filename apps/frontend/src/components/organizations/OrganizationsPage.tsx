@@ -1,16 +1,27 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { organizations as initialOrganizations } from "../../data/mock/taskforge";
+
+import { createOrganization, getOrganizations } from "../../lib/api/organization";
 import { initials } from "../../lib/format";
-import type { MockOrganization } from "../../types/taskforge";
+import type { Organization, Role } from "../../types/taskforge";
 import { AppShell, Icon, PageContainer } from "../layout/AppShell";
 
 type ViewState = "populated" | "modal" | "loading" | "empty" | "error";
 
 export function OrganizationsPage() {
-  const [organizations, setOrganizations] =
-    useState<MockOrganization[]>(initialOrganizations);
-  const [viewState, setViewState] = useState<ViewState>("populated");
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [viewState, setViewState] = useState<ViewState>("loading");
+
+  useEffect(() => {
+    getOrganizations()
+      .then((data) => {
+        setOrganizations(data);
+        setViewState(data.length ? "populated" : "empty");
+      })
+      .catch(() => {
+        setViewState("error");
+      });
+  }, []);
   const [query, setQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
@@ -74,43 +85,21 @@ export function OrganizationsPage() {
         </section>
 
         {viewState === "loading" ? <OrganizationSkeleton /> : null}
-        {viewState === "empty" ? <OrganizationEmpty onCreate={openCreate} /> : null}
+        {viewState === "empty" ? (
+          <OrganizationEmpty onCreate={openCreate} />
+        ) : null}
         {viewState === "error" ? (
           <OrganizationError onRetry={() => setViewState("populated")} />
         ) : null}
         {viewState === "populated" || viewState === "modal" ? (
-          <section className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {visibleOrganizations.map((organization) => (
-                <OrganizationCard
-                  key={organization.id}
-                  organization={organization}
-                />
-              ))}
-            </div>
-            <div className="flex flex-col items-center justify-between gap-4 rounded-xl bg-[var(--surface-container-low)] p-6 shadow-sm md:flex-row">
-              <div className="flex items-center gap-4">
-                <span className="grid h-10 w-10 place-items-center rounded-full bg-surface text-accent shadow-sm">
-                  <Icon>corporate_fare</Icon>
-                </span>
-                <div>
-                  <h2 className="text-base font-semibold text-ink">
-                    Looking to consolidate multiple teams?
-                  </h2>
-                  <p className="text-[13px] text-ink-2">
-                    TaskForge Enterprise supports unified SSO, audit trails,
-                    and multi-tenant billing.
-                  </p>
-                </div>
-              </div>
-              <button
-                className="rounded-md bg-surface px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-[var(--surface-container-high)]"
-                type="button"
-              >
-                Explore Enterprise features
-              </button>
-            </div>
-          </section>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {visibleOrganizations.map((organization) => (
+              <OrganizationCard
+                key={organization.id}
+                organization={organization}
+              />
+            ))}
+          </div>
         ) : null}
       </PageContainer>
       <CreateOrganizationDialog
@@ -119,26 +108,9 @@ export function OrganizationsPage() {
           setIsCreateOpen(false);
           setViewState("populated");
         }}
-        onCreate={(name, slug) => {
-          setOrganizations((current) => [
-            ...current,
-            {
-              activityLabel: "Last active just now",
-              boards: 0,
-              code: `org_${slug.slice(0, 8)}`,
-              createdAt: new Date().toISOString(),
-              description:
-                "A private workspace for your team to build, triage, and ship software.",
-              healthLabel: "Workspace Setup",
-              healthPercent: 12,
-              id: slug,
-              memberAvatars: [],
-              members: 1,
-              name,
-              role: "OWNER",
-              updatedAt: new Date().toISOString(),
-            },
-          ]);
+        onCreate={async (name) => {
+          const organization = await createOrganization(name);
+          setOrganizations((current) => [...current, organization]);
         }}
       />
     </AppShell>
@@ -179,7 +151,9 @@ function StateBar({
                 : "text-ink-2 hover:bg-surface-raised hover:text-ink"
             }`}
             key={state.value}
-            onClick={() => (state.value === "modal" ? onCreate() : onSelect(state.value))}
+            onClick={() =>
+              state.value === "modal" ? onCreate() : onSelect(state.value)
+            }
             type="button"
           >
             {state.label}
@@ -190,14 +164,10 @@ function StateBar({
   );
 }
 
-function OrganizationCard({
-  organization,
-}: {
-  organization: MockOrganization;
-}) {
+function OrganizationCard({ organization }: { organization: Organization }) {
   return (
     <Link
-      className="group flex min-h-[230px] flex-col justify-between rounded-xl bg-surface p-6 shadow-sm hover:shadow-md"
+      className="group flex min-h-[210px] flex-col justify-between rounded-xl bg-surface p-6 shadow-sm hover:shadow-md"
       to={`/organizations/${organization.id}/boards`}
     >
       <div className="flex flex-col gap-4">
@@ -211,47 +181,35 @@ function OrganizationCard({
                 {organization.name}
               </h2>
               <span className="font-mono text-[10px] uppercase tracking-[0.04em] text-ink-3">
-                {organization.code}
+                {organization.id}
               </span>
             </div>
           </div>
           <RolePill role={organization.role} />
         </div>
-        <p className="line-clamp-2 text-[13px] leading-[18px] text-ink-2">
-          {organization.description}
-        </p>
-        <div className="space-y-1.5 py-1">
-          <div className="flex justify-between font-mono text-[10px] font-medium text-ink-2">
-            <span>{organization.healthLabel}</span>
-            <span className="text-success">{organization.healthPercent + 8}% on track</span>
-          </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-[var(--surface-container-high)]">
-            <div
-              className="h-full rounded-full bg-accent"
-              style={{ width: `${organization.healthPercent}%` }}
-            />
-          </div>
-        </div>
         <div className="flex items-center justify-between gap-4 text-[13px] text-ink-2">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
               <Icon className="text-[16px] text-ink-3">group</Icon>
-              <strong className="font-medium text-ink">{organization.members}</strong>
+              <strong className="font-medium text-ink">
+                {organization.members}
+              </strong>
               Members
             </span>
             <span className="flex items-center gap-1.5">
               <Icon className="text-[16px] text-ink-3">dashboard</Icon>
-              <strong className="font-medium text-ink">{organization.boards}</strong>
+              <strong className="font-medium text-ink">
+                {organization.boards}
+              </strong>
               Boards
             </span>
           </div>
-          <AvatarPile avatars={organization.memberAvatars} extra={organization.members - 2} />
         </div>
       </div>
       <div className="mt-6 flex items-center justify-between pt-2 text-ink-2">
         <span className="flex items-center gap-1 text-[13px]">
           <span className="h-1.5 w-1.5 rounded-full bg-success" />
-          {organization.activityLabel}
+          Updated {new Date(organization.updatedAt).toLocaleDateString()}
         </span>
         <Icon className="text-ink-2 group-hover:translate-x-1 group-hover:text-accent">
           arrow_forward
@@ -261,7 +219,7 @@ function OrganizationCard({
   );
 }
 
-function RolePill({ role }: { role: MockOrganization["role"] }) {
+function RolePill({ role }: { role: Role }) {
   const className =
     role === "OWNER"
       ? "bg-[var(--role-owner-bg)] text-[var(--role-owner-fg)]"
@@ -270,27 +228,11 @@ function RolePill({ role }: { role: MockOrganization["role"] }) {
         : "bg-surface-raised text-ink-2";
 
   return (
-    <span className={`rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] shadow-sm ${className}`}>
+    <span
+      className={`rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] shadow-sm ${className}`}
+    >
       {role.toLowerCase()}
     </span>
-  );
-}
-
-function AvatarPile({ avatars, extra }: { avatars: string[]; extra: number }) {
-  return (
-    <div className="hidden -space-x-1.5 overflow-hidden sm:flex">
-      {avatars.slice(0, 2).map((avatar) => (
-        <img
-          alt=""
-          className="h-6 w-6 rounded-full object-cover ring-2 ring-surface"
-          key={avatar}
-          src={avatar}
-        />
-      ))}
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--surface-container-highest)] font-mono text-[10px] text-ink ring-2 ring-surface">
-        +{Math.max(extra, 0)}
-      </span>
-    </div>
   );
 }
 
@@ -298,7 +240,10 @@ function OrganizationSkeleton() {
   return (
     <div className="grid animate-pulse grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {[1, 2, 3].map((item) => (
-        <div className="h-[230px] rounded-xl bg-surface p-6 shadow-sm" key={item}>
+        <div
+          className="h-[230px] rounded-xl bg-surface p-6 shadow-sm"
+          key={item}
+        >
           <div className="flex justify-between">
             <div className="flex gap-3">
               <div className="h-11 w-11 rounded-lg bg-[var(--surface-container-highest)]" />
@@ -323,12 +268,18 @@ function OrganizationEmpty({ onCreate }: { onCreate: () => void }) {
       <span className="grid h-16 w-16 place-items-center rounded-2xl bg-[var(--surface-container-high)] text-ink-2 shadow-inner">
         <Icon className="text-[32px]">folder_off</Icon>
       </span>
-      <h2 className="mt-4 text-xl font-semibold text-ink">No organizations found</h2>
+      <h2 className="mt-4 text-xl font-semibold text-ink">
+        No organizations found
+      </h2>
       <p className="mt-2 max-w-md text-[15px] text-ink-2">
         You are not a member of any workspace yet. Create your first workspace
         to organize engineering boards, track issues, and invite team members.
       </p>
-      <button className="mt-6 flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-accent-fg" onClick={onCreate} type="button">
+      <button
+        className="mt-6 flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-accent-fg"
+        onClick={onCreate}
+        type="button"
+      >
         <Icon className="text-[18px]">add</Icon>Create your first workspace
       </button>
     </section>
@@ -341,11 +292,18 @@ function OrganizationError({ onRetry }: { onRetry: () => void }) {
       <span className="grid h-16 w-16 place-items-center rounded-2xl bg-[var(--destructive-wash)] text-danger shadow-sm">
         <Icon className="text-[32px]">sync_problem</Icon>
       </span>
-      <h2 className="mt-4 text-xl font-semibold text-ink">Unable to load organizations</h2>
+      <h2 className="mt-4 text-xl font-semibold text-ink">
+        Unable to load organizations
+      </h2>
       <p className="mt-2 max-w-md text-[15px] text-ink-2">
-        An error occurred while establishing connection with the workspace registry.
+        An error occurred while establishing connection with the workspace
+        registry.
       </p>
-      <button className="mt-6 flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-accent-fg" onClick={onRetry} type="button">
+      <button
+        className="mt-6 flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-accent-fg"
+        onClick={onRetry}
+        type="button"
+      >
         <Icon className="text-[18px]">refresh</Icon>Retry request
       </button>
     </section>
@@ -359,14 +317,19 @@ function CreateOrganizationDialog({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (name: string, slug: string) => void;
+  onCreate: (name: string) => void | Promise<void>;
 }) {
   const [name, setName] = useState("Acme Design Lab");
-  const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "workspace";
+  const slug =
+    name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "workspace";
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onCreate(name.trim(), slug);
+    await onCreate(name.trim());
     onClose();
   }
 
@@ -380,27 +343,49 @@ function CreateOrganizationDialog({
             <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
               Workspace Setup
             </span>
-            <h2 className="mt-1 text-xl font-semibold text-ink">Create Organization</h2>
+            <h2 className="mt-1 text-xl font-semibold text-ink">
+              Create Organization
+            </h2>
             <p className="mt-1 text-[13px] text-ink-2">
               Set up a space for your team to build, triage, and ship software.
             </p>
           </div>
-          <button className="rounded-md p-1 text-ink-2 hover:bg-surface-raised hover:text-ink" onClick={onClose} type="button">
+          <button
+            className="rounded-md p-1 text-ink-2 hover:bg-surface-raised hover:text-ink"
+            onClick={onClose}
+            type="button"
+          >
             <Icon>close</Icon>
           </button>
         </div>
-        <form className="flex flex-col gap-4 px-6 pb-6 pt-2" onSubmit={handleSubmit}>
+        <form
+          className="flex flex-col gap-4 px-6 pb-6 pt-2"
+          onSubmit={handleSubmit}
+        >
           <label className="flex flex-col gap-1.5">
             <span className="flex justify-between text-[13px] font-medium text-ink">
-              Organization Name <span className="font-mono text-[10px] uppercase text-ink-3">Required</span>
+              Organization Name{" "}
+              <span className="font-mono text-[10px] uppercase text-ink-3">
+                Required
+              </span>
             </span>
-            <input className="h-9 rounded-md bg-surface px-3 text-[13px] text-ink shadow-sm outline-none focus:ring-2 focus:ring-accent/20" onChange={(event) => setName(event.target.value)} value={name} />
+            <input
+              className="h-9 rounded-md bg-surface px-3 text-[13px] text-ink shadow-sm outline-none focus:ring-2 focus:ring-accent/20"
+              onChange={(event) => setName(event.target.value)}
+              value={name}
+            />
           </label>
           <label className="flex flex-col gap-1.5">
-            <span className="text-[13px] font-medium text-ink">Organization URL</span>
+            <span className="text-[13px] font-medium text-ink">
+              Organization URL
+            </span>
             <span className="flex h-9 items-center rounded-md bg-surface-raised px-3 text-[13px] shadow-inner">
               <span className="text-ink-3">taskforge.io/</span>
-              <input className="w-full bg-transparent pl-1 outline-none" readOnly value={slug} />
+              <input
+                className="w-full bg-transparent pl-1 outline-none"
+                readOnly
+                value={slug}
+              />
             </span>
             <span className="font-mono text-[10px] text-ink-2">
               Can be updated later in organization settings.
@@ -409,17 +394,27 @@ function CreateOrganizationDialog({
           <div className="flex items-start gap-3 rounded-lg bg-[var(--surface-container-low)] p-3">
             <Icon className="mt-0.5 text-accent">lock</Icon>
             <div>
-              <p className="text-[13px] font-medium text-ink">Private workspace</p>
+              <p className="text-[13px] font-medium text-ink">
+                Private workspace
+              </p>
               <p className="text-[13px] text-ink-2">
-                Only invited members will have access to repositories and boards.
+                Only invited members will have access to repositories and
+                boards.
               </p>
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-4">
-            <button className="h-9 rounded-md bg-surface-raised px-4 text-sm font-medium text-ink hover:bg-[var(--surface-container-high)]" onClick={onClose} type="button">
+            <button
+              className="h-9 rounded-md bg-surface-raised px-4 text-sm font-medium text-ink hover:bg-[var(--surface-container-high)]"
+              onClick={onClose}
+              type="button"
+            >
               Cancel
             </button>
-            <button className="h-9 rounded-md bg-accent px-4 text-sm font-medium text-accent-fg hover:bg-[var(--accent-hover)]" type="submit">
+            <button
+              className="h-9 rounded-md bg-accent px-4 text-sm font-medium text-accent-fg hover:bg-[var(--accent-hover)]"
+              type="submit"
+            >
               Create Organization
             </button>
           </div>

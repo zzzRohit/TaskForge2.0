@@ -7,7 +7,7 @@ export const createOrganization = async (name: string, userId: string) => {
   }
   // Simulate organization creation
   const createdOrganization = await prisma.organization.create({
-    data: { 
+    data: {
       name,
       members: {
         create: {
@@ -15,26 +15,51 @@ export const createOrganization = async (name: string, userId: string) => {
           role: "OWNER", // Assuming the creator is the owner of the organization
         },
       },
-     },
+    },
   });
-  return createdOrganization;
+  const organizations = await getAllOrganizations(userId);
+  return organizations.find(
+    (organization) => organization.id === createdOrganization.id,
+  );
 };
 export const getAllOrganizations = async (userId: string) => {
-  return prisma.organization.findMany({
+  const organizations = await prisma.organization.findMany({
     where: {
       members: {
         some: {
-          userId: userId
-        }
-      }
-    }
+          userId,
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          members: true,
+          boards: true,
+        },
+      },
+      members: {
+        where: { userId },
+        select: { role: true },
+      },
+    },
   });
+
+  return organizations.map((organization) => ({
+    id: organization.id,
+    name: organization.name,
+    createdAt: organization.createdAt,
+    updatedAt: organization.updatedAt,
+    role: organization.members[0]?.role ?? "MEMBER",
+    members: organization._count.members,
+    boards: organization._count.boards,
+  }));
 };
 
 export const getOrganizationById = async (organizationId: string) => {
   return prisma.organization.findFirst({
     where: {
-      id: organizationId
-    }
+      id: organizationId,
+    },
   });
 };
