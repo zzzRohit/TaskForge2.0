@@ -1,26 +1,95 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
-  boards as initialBoards,
-  lists,
-  organizations,
-} from "../../data/mock/taskforge";
+  createBoard,
+  deleteBoard,
+  addBoardMember,
+  getBoard,
+  getBoardMembers,
+  getBoards,
+  removeBoardMember,
+  updateBoard,
+} from "../../lib/api/board";
+import {
+  createCard,
+  deleteCard,
+  moveCard,
+  updateCard,
+} from "../../lib/api/card";
+import {
+  getOrganizationMembers,
+  getOrganizations,
+  type OrganizationMember,
+} from "../../lib/api/organization";
+import {
+  createList,
+  deleteList,
+  getLists,
+  updateList,
+} from "../../lib/api/list";
 import { canPerformBoardAction } from "../../lib/permissions";
-import type { MockBoard, MockCard, MockList } from "../../types/taskforge";
+import { getStoredUser } from "../../lib/api/auth";
+import type {
+  ApiOrganization,
+  Board,
+  BoardMember,
+  MockBoard,
+  MockCard,
+  MockList,
+} from "../../types/taskforge";
 import { AppShell, Icon, PageContainer } from "../layout/AppShell";
+import { Breadcrumb } from "../layout/Breadcrumb";
 
 type BoardView = "grid" | "empty" | "loading";
 
 export function BoardsPage() {
   const { organizationId = "" } = useParams();
-  const organization = organizations.find((item) => item.id === organizationId);
-  const [boards, setBoards] = useState<MockBoard[]>(initialBoards);
-  const [view, setView] = useState<BoardView>("grid");
-  const [roleOverride, setRoleOverride] = useState<"owner" | "member">("owner");
+  const [organization, setOrganization] = useState<ApiOrganization | null>(
+    null,
+  );
+  const [boards, setBoards] = useState<Board[]>([]);
+  const [view, setView] = useState<BoardView>("loading");
   const [query, setQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [toast, setToast] = useState("");
+  useEffect(() => {
+    async function loadWorkspace() {
+      if (!organizationId) {
+        setView("empty");
+        return;
+      }
 
+      try {
+        setView("loading");
+        const [organizationList, boardList] = await Promise.all([
+          getOrganizations(),
+          getBoards(organizationId),
+        ]);
+        const nextOrganization = organizationList.find(
+          (item) => item.id === organizationId,
+        );
+
+        if (!nextOrganization) {
+          setView("empty");
+          return;
+        }
+
+        setOrganization(nextOrganization);
+        setBoards(boardList);
+        setView(boardList.length ? "grid" : "empty");
+      } catch {
+        setView("empty");
+      }
+    }
+
+    loadWorkspace();
+  }, [organizationId]);
   const organizationBoards = useMemo(
     () =>
       boards.filter(
@@ -35,15 +104,17 @@ export function BoardsPage() {
     return (
       <AppShell>
         <PageContainer>
-          <ErrorPanel message="Unable to load workspace." />
+          {view === "loading" ? (
+            <BoardsSkeleton />
+          ) : (
+            <ErrorPanel message="Unable to load workspace." />
+          )}
         </PageContainer>
       </AppShell>
     );
   }
 
-  const effectiveRole =
-    roleOverride === "member" ? "MEMBER" : organization.role;
-  const canCreate = canPerformBoardAction(effectiveRole, "create");
+  const canCreate = canPerformBoardAction(organization.role, "create");
 
   function showToast(message: string) {
     setToast(message);
@@ -52,31 +123,14 @@ export function BoardsPage() {
 
   return (
     <AppShell>
-      <BoardsStateBar
-        onCreate={() => setIsCreateOpen(true)}
-        onSelect={(nextView, nextRole) => {
-          setView(nextView);
-          setRoleOverride(nextRole);
-        }}
-        role={roleOverride}
-        view={view}
-      />
       <PageContainer>
-        <nav className="mb-6 flex items-center gap-1.5 text-sm text-ink-2">
-          <Link
-            className="flex items-center gap-1 hover:text-accent"
-            to="/organizations"
-          >
-            <Icon className="text-[16px]">domain</Icon> Organizations
-          </Link>
-          <Icon className="text-[14px] text-ink-3">chevron_right</Icon>
-          <span className="flex items-center gap-1.5 font-medium text-ink">
-            <span className="h-2 w-2 rounded-full bg-[var(--role-owner-fg)]" />
-            {organization.name}
-          </span>
-          <Icon className="text-[14px] text-ink-3">chevron_right</Icon>
-          <span className="font-medium text-accent">Boards</span>
-        </nav>
+        <Breadcrumb
+          items={[
+            { label: "Organizations", to: "/organizations" },
+            { label: organization.name },
+            { label: "Boards" },
+          ]}
+        />
 
         <section className="flex flex-col justify-between gap-6 pb-6 lg:flex-row lg:items-end">
           <div>
@@ -89,7 +143,7 @@ export function BoardsPage() {
                 {organization.name} • {organization.members} members •{" "}
                 {organization.boards} boards
               </span>
-              <RolePill role={effectiveRole} />
+              <RolePill role={organization.role} />
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -129,31 +183,18 @@ export function BoardsPage() {
               <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-2">
                 Boards in this organization
               </span>
-              <div className="flex items-center gap-2">
-                <button
-                  className="rounded-md bg-[var(--surface-container)] p-1.5 text-ink shadow-sm"
-                  title="Grid layout"
-                  type="button"
-                >
-                  <Icon className="text-[18px]">grid_view</Icon>
-                </button>
-                <button
-                  className="rounded-md p-1.5 text-ink-3 hover:bg-[var(--surface-container)] hover:text-ink"
-                  title="Table layout"
-                  type="button"
-                >
-                  <Icon className="text-[18px]">view_list</Icon>
-                </button>
-              </div>
             </div>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {organizationBoards.map((board) => (
                 <BoardCard
-                  board={board}
+                  board={toMockBoard(board)}
                   key={board.id}
                   organizationId={organization.id}
                 />
               ))}
+              {canCreate ? (
+                <CreateBoardCard onCreate={() => setIsCreateOpen(true)} />
+              ) : null}
             </div>
           </section>
         ) : null}
@@ -161,29 +202,9 @@ export function BoardsPage() {
       <CreateBoardDialog
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}
-        onCreate={(input) => {
-          const id = input.title
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-|-$/g, "");
-          setBoards((current) => [
-            {
-              activeMembers: 1,
-              collaborators: "New board",
-              createdAt: new Date().toISOString(),
-              description: input.description || "No description provided.",
-              id,
-              memberAvatars: [],
-              organizationId: organization.id,
-              ownerId: "user-1",
-              status: "Just Created",
-              statusTone: "success",
-              title: input.title,
-              updatedAt: new Date().toISOString(),
-              updatedLabel: "Updated just now",
-            },
-            ...current,
-          ]);
+        onCreate={async (input) => {
+          const board = await createBoard(organization.id, input);
+          setBoards((current) => [board, ...current]);
           setView("grid");
           showToast(`Board "${input.title}" created successfully.`);
         }}
@@ -195,23 +216,103 @@ export function BoardsPage() {
 
 export function BoardDetailPage() {
   const navigate = useNavigate();
-  const { boardId = "", organizationId = "" } = useParams();
-  const organization = organizations.find((item) => item.id === organizationId);
-  const [boards, setBoards] = useState<MockBoard[]>(initialBoards);
+  const { boardId, organizationId } = useParams();
+
+  const [organization, setOrganization] = useState<ApiOrganization | null>(
+    null,
+  );
+  const [board, setBoard] = useState<MockBoard | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [toast, setToast] = useState("");
+  const [boardLists, setBoardLists] = useState<MockList[]>([]);
+  const [boardMembers, setBoardMembers] = useState<BoardMember[]>([]);
+  const [isMembersOpen, setIsMembersOpen] = useState(false);
+  const [isCreateListOpen, setIsCreateListOpen] = useState(false);
+  const [editingList, setEditingList] = useState<MockList | null>(null);
+  const [cardDialog, setCardDialog] = useState<{
+    card?: MockCard;
+    listId: string;
+  } | null>(null);
+  const [draggingCard, setDraggingCard] = useState<MockCard | null>(null);
+  const [confirmation, setConfirmation] = useState<{
+    message: string;
+    onConfirm: () => void | Promise<void>;
+  } | null>(null);
 
-  const board = boards.find(
-    (item) => item.id === boardId && item.organizationId === organizationId,
-  );
-  const boardLists = lists.filter((list) => list.boardId === boardId);
+  useEffect(() => {
+    async function loadBoard() {
+      if (!organizationId || !boardId) {
+        setLoadError("Board not found.");
+        setIsLoading(false);
+        return;
+      }
 
-  if (!organization || !board) {
+      try {
+        setIsLoading(true);
+        setLoadError("");
+
+        const [organizationList, boardData, listData, memberData] =
+          await Promise.all([
+            getOrganizations(),
+            getBoard(organizationId, boardId),
+            getLists(organizationId, boardId),
+            getBoardMembers(organizationId, boardId),
+          ]);
+
+        const nextOrganization = organizationList.find(
+          (item) => item.id === organizationId,
+        );
+
+        if (!nextOrganization) {
+          setLoadError("Organization not found.");
+          return;
+        }
+
+        setOrganization(nextOrganization);
+        setBoard(toMockBoard(boardData));
+        setBoardMembers(memberData);
+        setBoardLists(
+          listData.map((list) => ({
+            boardId: list.boardId,
+            cards: list.cards.map((card) => ({
+              description: card.description ?? undefined,
+              id: card.id,
+              listId: card.listId,
+              position: card.position,
+              title: card.title,
+            })),
+            id: list.id,
+            title: list.title,
+          })),
+        );
+      } catch {
+        setLoadError("Unable to load board.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadBoard();
+  }, [organizationId, boardId]);
+
+  if (isLoading) {
     return (
       <AppShell>
         <PageContainer>
-          <ErrorPanel message="Board not found." />
+          <BoardsSkeleton />
+        </PageContainer>
+      </AppShell>
+    );
+  }
+
+  if (loadError || !organization || !board) {
+    return (
+      <AppShell>
+        <PageContainer>
+          <ErrorPanel message={loadError || "Board not found."} />
         </PageContainer>
       </AppShell>
     );
@@ -222,89 +323,284 @@ export function BoardDetailPage() {
     window.setTimeout(() => setToast(""), 3200);
   }
 
-  const canManage = canPerformBoardAction(organization.role, "edit");
+  const currentUser = getStoredUser();
+  const canManage =
+    board.ownerId === currentUser?.id ||
+    canPerformBoardAction(organization.role, "edit");
+  const currentOrganization = organization;
+  const currentBoard = board;
+
+  function replaceList(listId: string, update: (list: MockList) => MockList) {
+    setBoardLists((current) =>
+      current.map((list) => (list.id === listId ? update(list) : list)),
+    );
+  }
+
+  async function handleCreateList(title: string) {
+    const created = await createList(currentOrganization.id, currentBoard.id, {
+      position: boardLists.length,
+      title,
+    });
+    setBoardLists((current) => [
+      ...current,
+      {
+        boardId: created.boardId,
+        cards: [],
+        id: created.id,
+        title: created.title,
+      },
+    ]);
+    setIsCreateListOpen(false);
+    showToast("List created successfully");
+  }
+
+  async function handleSaveList(listId: string, title: string) {
+    const updated = await updateList(
+      currentOrganization.id,
+      currentBoard.id,
+      listId,
+      { title },
+    );
+    replaceList(listId, (list) => ({ ...list, title: updated.title }));
+    setEditingList(null);
+    showToast("List updated successfully");
+  }
+
+  async function handleDeleteList(list: MockList) {
+    await deleteList(currentOrganization.id, currentBoard.id, list.id);
+    setBoardLists((current) => current.filter((item) => item.id !== list.id));
+    showToast("List deleted successfully");
+  }
+
+  async function handleCreateCard(
+    listId: string,
+    title: string,
+    description: string,
+  ) {
+    const created = await createCard(listId, { description, title });
+    replaceList(listId, (list) => ({
+      ...list,
+      cards: [
+        ...list.cards,
+        {
+          description: created.description ?? undefined,
+          id: created.id,
+          listId,
+          position: created.position,
+          title: created.title,
+        },
+      ],
+    }));
+    setCardDialog(null);
+    showToast("Card created successfully");
+  }
+
+  async function handleSaveCard(
+    cardId: string,
+    title: string,
+    description: string,
+  ) {
+    const updated = await updateCard(cardId, { description, title });
+    setBoardLists((current) =>
+      current.map((list) => ({
+        ...list,
+        cards: list.cards.map((card) =>
+          card.id === cardId
+            ? {
+                ...card,
+                description: updated.description ?? undefined,
+                title: updated.title,
+              }
+            : card,
+        ),
+      })),
+    );
+    setCardDialog(null);
+    showToast("Card updated successfully");
+  }
+
+  async function handleDeleteCard(card: MockCard) {
+    await deleteCard(card.id);
+    setBoardLists((current) =>
+      current.map((list) => ({
+        ...list,
+        cards: list.cards.filter((item) => item.id !== card.id),
+      })),
+    );
+    showToast("Card deleted successfully");
+  }
+
+  async function handleMoveCard(card: MockCard, targetListId: string) {
+    const targetList = boardLists.find((list) => list.id === targetListId);
+    if (!targetList) return;
+    await handleDropCard(card, targetListId, targetList.cards.length);
+  }
+
+  async function handleDropCard(
+    card: MockCard,
+    targetListId: string,
+    position: number,
+  ) {
+    if (!card.listId) return;
+    if (card.listId === targetListId) {
+      const sourceList = boardLists.find((list) => list.id === card.listId);
+      const currentPosition = sourceList?.cards.findIndex(
+        (item) => item.id === card.id,
+      );
+      if (currentPosition === position || currentPosition === position - 1)
+        return;
+    }
+
+    await moveCard(card.id, targetListId, position);
+    setBoardLists((current) =>
+      current.map((list) => {
+        const withoutCard = list.cards.filter((item) => item.id !== card.id);
+        if (list.id !== targetListId) return { ...list, cards: withoutCard };
+
+        const nextCards = [...withoutCard];
+        nextCards.splice(Math.min(position, nextCards.length), 0, {
+          ...card,
+          listId: targetListId,
+        });
+        return { ...list, cards: nextCards };
+      }),
+    );
+    setDraggingCard(null);
+    showToast("Card moved successfully");
+  }
 
   return (
     <AppShell>
-      <div className="bg-surface px-4 py-3 shadow-sm lg:px-10">
-        <div className="mx-auto flex max-w-screen-2xl flex-wrap items-center justify-between gap-3">
-          <nav className="flex items-center gap-1.5 text-sm text-ink-2">
-            <Link
-              className="flex items-center gap-1 hover:text-accent"
-              to="/organizations"
-            >
-              <Icon className="text-[16px]">domain</Icon>Organizations
-            </Link>
-            <Icon className="text-[14px]">chevron_right</Icon>
-            <Link
-              className="font-medium text-ink hover:text-accent"
-              to={`/organizations/${organization.id}/boards`}
-            >
-              {organization.name}
-            </Link>
-            <Icon className="text-[14px]">chevron_right</Icon>
-            <span>Boards</span>
-            <Icon className="text-[14px]">chevron_right</Icon>
-            <span className="max-w-xs truncate font-medium text-accent">
-              {board.title}
-            </span>
-          </nav>
-          <span className="rounded bg-[var(--surface-container)] px-2.5 py-1 font-mono text-[10px] uppercase text-ink-2">
-            <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-success" />
-            Board ID: <strong className="text-ink">BRD-8092-S24</strong>
-          </span>
-        </div>
-      </div>
-
       <PageContainer>
-        <section className="flex flex-col justify-between gap-6 lg:flex-row lg:items-start">
-          <div className="max-w-3xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusPill board={board} />
-              <RolePill role={organization.role} />
-              <span className="text-[13px] text-ink-2">
-                {board.updatedLabel}
-              </span>
+        <div className="-mt-5">
+          <Breadcrumb
+            items={[
+              { label: "Organizations", to: "/organizations" },
+              {
+                label: organization.name,
+                to: `/organizations/${organization.id}/boards`,
+              },
+              {
+                label: "Boards",
+                to: `/organizations/${organization.id}/boards`,
+              },
+              { label: board.title },
+            ]}
+          />
+        </div>
+
+        <section className="border-b border-line pb-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0 max-w-3xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusPill board={board} />
+                <RolePill role={organization.role} />
+                <span className="text-xs text-ink-3">{board.updatedLabel}</span>
+              </div>
+              <h1 className="mt-1 text-3xl font-semibold leading-9 tracking-normal text-accent lg:text-4xl lg:leading-10">
+                {board.title}
+              </h1>
+              <p className="mt-1.5 max-w-2xl text-sm leading-5 text-ink-2">
+                {board.description}
+              </p>
+              <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.06em] text-ink-3">
+                Board details <span className="mx-1 text-line-strong">/</span>{" "}
+                ID: {board.id}
+              </p>
             </div>
-            <h1 className="mt-2 text-[32px] font-semibold leading-[38px] tracking-normal text-accent lg:text-5xl lg:leading-[52px]">
-              {board.title}
-            </h1>
-            <p className="mt-3 max-w-2xl text-[15px] leading-[22px] text-ink-2">
-              {board.description}
-            </p>
+            <div className="flex shrink-0 flex-wrap items-center gap-2 lg:pt-1">
+              <button
+                className="flex h-8 items-center gap-2 rounded-md border border-line bg-surface px-2.5 text-xs font-medium text-ink-2 hover:border-line-strong hover:bg-surface-raised hover:text-ink"
+                onClick={() => setIsMembersOpen(true)}
+                type="button"
+              >
+                <BoardMemberAvatars members={boardMembers} />
+                <span>Members {boardMembers.length}</span>
+              </button>
+              {canManage ? (
+                <>
+                  <button
+                    className="flex h-8 items-center gap-1.5 rounded-md border border-line bg-surface px-2.5 text-xs font-medium text-ink-2 hover:border-line-strong hover:bg-surface-raised hover:text-ink"
+                    onClick={() => setIsEditOpen(true)}
+                    type="button"
+                  >
+                    <Icon className="text-[16px]">edit</Icon>Edit
+                  </button>
+                  <button
+                    aria-label="Delete board"
+                    className="grid h-8 w-8 place-items-center rounded-md border border-line bg-surface text-ink-3 hover:border-danger hover:bg-[var(--destructive-wash)] hover:text-danger"
+                    onClick={() => setIsDeleteOpen(true)}
+                    title="Delete board"
+                    type="button"
+                  >
+                    <Icon className="text-[17px]">delete</Icon>
+                  </button>
+                </>
+              ) : null}
+            </div>
           </div>
-          {canManage ? (
-            <div className="flex shrink-0 items-center gap-2">
-              <button
-                className="flex h-9 items-center gap-2 rounded-md bg-surface px-4 text-sm font-medium text-ink shadow-sm hover:bg-[var(--surface-container-high)]"
-                onClick={() => setIsEditOpen(true)}
-                type="button"
-              >
-                <Icon className="text-[17px] text-ink-2">edit</Icon>Edit Board
-              </button>
-              <button
-                className="flex h-9 items-center gap-1.5 rounded-md bg-surface px-3.5 text-sm font-medium text-ink-2 shadow-sm hover:bg-[var(--destructive-wash)] hover:text-danger"
-                onClick={() => setIsDeleteOpen(true)}
-                type="button"
-              >
-                <Icon className="text-[17px]">delete</Icon>
-                <span className="hidden sm:inline">Delete Board</span>
-              </button>
-            </div>
-          ) : null}
         </section>
 
-        <section className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {boardLists.length > 0
-            ? boardLists.map((list) => (
-                <BoardColumn key={list.id} list={list} />
-              ))
-            : ["To Do", "In Progress", "Review", "Done"].map((title) => (
-                <BoardColumn
-                  key={title}
-                  list={{ boardId: board.id, cards: [], id: title, title }}
-                />
-              ))}
+        <section className="app-scrollbar mt-4 flex min-h-[360px] gap-3 overflow-x-auto pb-3">
+          {boardLists.length > 0 ? (
+            boardLists.map((list) => (
+              <BoardColumn
+                canManage={canManage}
+                key={list.id}
+                list={list}
+                lists={boardLists}
+                onAddCard={() => setCardDialog({ listId: list.id })}
+                onDeleteCard={(card) =>
+                  setConfirmation({
+                    message: `Delete "${card.title}"?`,
+                    onConfirm: () => handleDeleteCard(card),
+                  })
+                }
+                onDeleteList={(list) =>
+                  setConfirmation({
+                    message: `Delete "${list.title}" and all its cards?`,
+                    onConfirm: () => handleDeleteList(list),
+                  })
+                }
+                onEditCard={(card) => setCardDialog({ card, listId: list.id })}
+                onEditList={setEditingList}
+                onMoveCard={handleMoveCard}
+                onDropCard={(position) => {
+                  if (draggingCard) {
+                    void handleDropCard(draggingCard, list.id, position);
+                  }
+                }}
+                onDragStart={setDraggingCard}
+                onDragEnd={() => setDraggingCard(null)}
+              />
+            ))
+          ) : (
+            <div className="flex min-w-[260px] items-center justify-center rounded-lg border border-dashed border-line-strong bg-surface p-6 text-center">
+              <Icon className="text-[28px] text-ink-3">view_column</Icon>
+              <div className="ml-3 text-left">
+                <p className="text-sm font-medium text-ink">No lists yet</p>
+                {canManage ? (
+                  <button
+                    className="mt-1 text-xs font-medium text-accent hover:underline"
+                    onClick={() => setIsCreateListOpen(true)}
+                    type="button"
+                  >
+                    + Add list
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          )}
+          {canManage ? (
+            <button
+              className="flex min-h-[300px] min-w-[150px] flex-col items-center justify-center rounded-lg border border-dashed border-line-strong bg-surface/70 px-4 text-center text-ink-3 hover:border-accent hover:bg-surface-raised hover:text-accent"
+              onClick={() => setIsCreateListOpen(true)}
+              type="button"
+            >
+              <Icon className="text-[20px]">add</Icon>
+              <span className="mt-1 text-xs font-medium">Add list</span>
+            </button>
+          ) : null}
         </section>
       </PageContainer>
 
@@ -312,109 +608,102 @@ export function BoardDetailPage() {
         board={board}
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
-        onSave={(input) => {
-          setBoards((current) =>
-            current.map((item) =>
-              item.id === board.id
-                ? {
-                    ...item,
-                    description: input.description,
-                    title: input.title,
-                    updatedLabel: "Updated just now",
-                  }
-                : item,
-            ),
-          );
-          showToast("Board changes saved successfully");
+        onSave={async (input) => {
+          try {
+            const updatedBoard = await updateBoard(
+              organization.id,
+              board.id,
+              input,
+            );
+            setBoard(toMockBoard(updatedBoard));
+            showToast("Board changes saved successfully");
+          } catch {
+            showToast("Unable to save board changes");
+          }
         }}
       />
       <DeleteBoardDialog
         boardTitle={board.title}
         isOpen={isDeleteOpen}
         onClose={() => setIsDeleteOpen(false)}
-        onDelete={() => {
-          setBoards((current) =>
-            current.filter((item) => item.id !== board.id),
-          );
-          showToast("Deleting board... Redirecting to workspace");
-          window.setTimeout(
-            () => navigate(`/organizations/${organization.id}/boards`),
-            700,
-          );
+        onDelete={async () => {
+          try {
+            await deleteBoard(organization.id, board.id);
+            showToast("Board deleted. Redirecting to workspace");
+            window.setTimeout(
+              () => navigate(`/organizations/${organization.id}/boards`),
+              700,
+            );
+          } catch {
+            showToast("Unable to delete board");
+          }
         }}
       />
       {toast ? <Toast message={toast} /> : null}
+      <ListDialog
+        isOpen={isCreateListOpen}
+        onClose={() => setIsCreateListOpen(false)}
+        onSave={handleCreateList}
+        title="Create List"
+      />
+      <ListDialog
+        key={editingList?.id ?? "create-list"}
+        initialTitle={editingList?.title}
+        isOpen={Boolean(editingList)}
+        onClose={() => setEditingList(null)}
+        onSave={async (title) => {
+          if (editingList) await handleSaveList(editingList.id, title);
+        }}
+        title="Edit List"
+      />
+      <CardDialog
+        key={cardDialog?.card?.id ?? cardDialog?.listId ?? "card"}
+        card={cardDialog?.card}
+        isOpen={Boolean(cardDialog)}
+        onClose={() => setCardDialog(null)}
+        onSave={async (title, description) => {
+          if (!cardDialog) return;
+          if (cardDialog.card) {
+            await handleSaveCard(cardDialog.card.id, title, description);
+          } else {
+            await handleCreateCard(cardDialog.listId, title, description);
+          }
+        }}
+      />
+      <BoardMembersDialog
+        boardId={board.id}
+        canManage={canManage}
+        isOpen={isMembersOpen}
+        members={boardMembers}
+        onChanged={async () => {
+          const nextMembers = await getBoardMembers(organization.id, board.id);
+          setBoardMembers(nextMembers);
+        }}
+        onClose={() => setIsMembersOpen(false)}
+        organization={organization}
+      />
+      <ConfirmDialog
+        isOpen={Boolean(confirmation)}
+        message={confirmation?.message ?? ""}
+        onClose={() => setConfirmation(null)}
+        onConfirm={async () => {
+          if (confirmation) await confirmation.onConfirm();
+          setConfirmation(null);
+        }}
+      />
     </AppShell>
   );
 }
 
-function BoardsStateBar({
-  onCreate,
-  onSelect,
-  role,
-  view,
-}: {
-  onCreate: () => void;
-  onSelect: (view: BoardView, role: "owner" | "member") => void;
-  role: "owner" | "member";
-  view: BoardView;
-}) {
-  return (
-    <div className="flex w-full flex-col justify-between gap-3 bg-[var(--surface-container-high)]/60 px-4 py-1.5 shadow-sm lg:flex-row lg:items-center lg:px-6">
-      <span className="flex items-center gap-1 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-2">
-        <Icon className="text-[14px]">tune</Icon> UI State Engine:
-      </span>
-      <div className="flex gap-1 overflow-x-auto rounded-lg bg-[var(--surface-container)] p-0.5 shadow-sm">
-        <StateButton
-          active={view === "grid" && role === "owner"}
-          onClick={() => onSelect("grid", "owner")}
-        >
-          Boards Grid
-        </StateButton>
-        <StateButton active={false} onClick={onCreate}>
-          Create Board Modal
-        </StateButton>
-        <StateButton
-          active={view === "empty"}
-          onClick={() => onSelect("empty", "owner")}
-        >
-          Empty State
-        </StateButton>
-        <StateButton
-          active={view === "loading"}
-          onClick={() => onSelect("loading", "owner")}
-        >
-          Loading State
-        </StateButton>
-        <StateButton
-          active={role === "member"}
-          onClick={() => onSelect("grid", "member")}
-        >
-          Member View
-        </StateButton>
-      </div>
-    </div>
-  );
-}
-
-function StateButton({
-  active,
-  children,
-  onClick,
-}: {
-  active: boolean;
-  children: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      className={`shrink-0 rounded-md px-3 py-1 text-[13px] ${active ? "bg-surface font-medium text-ink shadow-sm" : "text-ink-2 hover:text-ink"}`}
-      onClick={onClick}
-      type="button"
-    >
-      {children}
-    </button>
-  );
+function toMockBoard(board: Board): MockBoard {
+  return {
+    ...board,
+    activeMembers: 0,
+    memberAvatars: [],
+    status: "Active",
+    statusTone: "success",
+    updatedLabel: `Updated ${new Date(board.updatedAt).toLocaleDateString()}`,
+  };
 }
 
 function BoardCard({
@@ -426,7 +715,7 @@ function BoardCard({
 }) {
   return (
     <Link
-      className="group flex min-h-[220px] flex-col justify-between rounded-xl bg-surface p-6 shadow-sm hover:shadow-md"
+      className="group flex min-h-[180px] flex-col justify-between rounded-lg border border-line bg-surface p-5 shadow-[var(--shadow-sm)] hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[var(--shadow-md)]"
       to={`/organizations/${organizationId}/boards/${board.id}`}
     >
       <div>
@@ -441,17 +730,17 @@ function BoardCard({
             </span>
           </div>
         </div>
-        <h2 className="text-xl font-semibold leading-7 text-ink group-hover:text-accent">
+        <h2 className="text-lg font-semibold leading-6 text-ink group-hover:text-accent">
           {board.title}
         </h2>
-        <p className="line-clamp-2 mt-2 text-[15px] leading-[22px] text-ink-2">
+        <p className="mt-2 line-clamp-2 text-[13px] leading-5 text-ink-2">
           {board.description}
         </p>
       </div>
-      <div className="mt-6 flex items-center justify-between gap-3">
+      <div className="mt-4 flex items-center justify-between gap-3">
         <span className="flex items-center gap-2 font-mono text-[10px] font-medium text-ink-2">
           <BoardAvatarPile avatars={board.memberAvatars} />
-          {board.activeMembers} active members
+          Board workspace
         </span>
         <span className="flex items-center gap-1 text-[13px] text-ink-3">
           <Icon className="text-[15px]">schedule</Icon>
@@ -459,6 +748,24 @@ function BoardCard({
         </span>
       </div>
     </Link>
+  );
+}
+
+function CreateBoardCard({ onCreate }: { onCreate: () => void }) {
+  return (
+    <button
+      className="group flex min-h-[180px] flex-col items-center justify-center rounded-lg border border-dashed border-line-strong bg-surface p-5 text-center hover:-translate-y-0.5 hover:border-accent hover:bg-surface-raised"
+      onClick={onCreate}
+      type="button"
+    >
+      <span className="grid h-10 w-10 place-items-center rounded-full bg-surface-raised text-accent group-hover:bg-accent group-hover:text-accent-fg">
+        <Icon>add</Icon>
+      </span>
+      <span className="mt-3 text-sm font-semibold text-ink">
+        Create new board
+      </span>
+      <span className="mt-1 text-xs text-ink-3">Start a new project board</span>
+    </button>
   );
 }
 
@@ -512,7 +819,258 @@ function BoardAvatarPile({ avatars }: { avatars: string[] }) {
   );
 }
 
-function BoardColumn({ list }: { list: MockList }) {
+function BoardMemberAvatars({ members }: { members: BoardMember[] }) {
+  return (
+    <span className="flex -space-x-1.5">
+      {members.slice(0, 3).map((member) =>
+        member.avatarUrl ? (
+          <img
+            alt=""
+            className="h-5 w-5 rounded-full object-cover ring-2 ring-[var(--surface-container)]"
+            key={member.id}
+            src={member.avatarUrl}
+          />
+        ) : (
+          <span
+            className="grid h-5 w-5 place-items-center rounded-full bg-accent text-[8px] font-semibold text-accent-fg ring-2 ring-[var(--surface-container)]"
+            key={member.id}
+          >
+            {member.name.slice(0, 1).toUpperCase()}
+          </span>
+        ),
+      )}
+    </span>
+  );
+}
+
+function BoardMembersDialog({
+  boardId,
+  canManage,
+  isOpen,
+  members,
+  onChanged,
+  onClose,
+  organization,
+}: {
+  boardId: string;
+  canManage: boolean;
+  isOpen: boolean;
+  members: BoardMember[];
+  onChanged: () => void | Promise<void>;
+  onClose: () => void;
+  organization: ApiOrganization;
+}) {
+  const [organizationMembers, setOrganizationMembers] = useState<
+    OrganizationMember[]
+  >([]);
+  const [error, setError] = useState("");
+  const [memberToRemove, setMemberToRemove] = useState<BoardMember | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!isOpen || !canManage) return;
+    getOrganizationMembers(organization.id)
+      .then(setOrganizationMembers)
+      .catch(() => setError("Unable to load organization members."));
+  }, [canManage, isOpen, organization.id]);
+
+  async function addMember(userId: string) {
+    try {
+      await addBoardMember(organization.id, boardId, userId);
+      await onChanged();
+    } catch {
+      setError("Unable to add that member to the board.");
+    }
+  }
+
+  async function removeMember(member: BoardMember) {
+    if (member.role === "OWNER") return;
+    try {
+      await removeBoardMember(organization.id, boardId, member.id);
+      await onChanged();
+      setMemberToRemove(null);
+    } catch {
+      setError("Unable to remove that board member.");
+    }
+  }
+
+  if (!isOpen) return null;
+  const memberIds = new Set(members.map((member) => member.id));
+  const availableMembers = organizationMembers.filter(
+    (member) => !memberIds.has(member.id),
+  );
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm">
+      <section className="w-full max-w-lg rounded-xl bg-surface p-6 shadow-2xl">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+              Board members
+            </p>
+            <h2 className="mt-1 text-xl font-semibold text-ink">
+              {members.length} members
+            </h2>
+          </div>
+          <button
+            aria-label="Close board members"
+            className="rounded-md p-1 text-ink-3 hover:bg-surface-raised hover:text-ink"
+            onClick={onClose}
+            type="button"
+          >
+            <Icon>close</Icon>
+          </button>
+        </div>
+        {error ? (
+          <p className="mt-4 rounded-md bg-[var(--destructive-wash)] p-3 text-sm text-danger">
+            {error}
+          </p>
+        ) : null}
+        <div className="mt-5 space-y-2">
+          {members.map((member) => (
+            <div
+              className="flex items-center gap-3 rounded-lg border border-line p-3"
+              key={member.id}
+            >
+              {member.avatarUrl ? (
+                <img
+                  alt=""
+                  className="h-9 w-9 rounded-full object-cover"
+                  src={member.avatarUrl}
+                />
+              ) : (
+                <span className="grid h-9 w-9 place-items-center rounded-full bg-accent text-xs font-semibold text-accent-fg">
+                  {member.name.slice(0, 1).toUpperCase()}
+                </span>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-ink">
+                  {member.name}
+                </p>
+                <p className="truncate text-xs text-ink-3">{member.email}</p>
+              </div>
+              <RolePill role={member.role} />
+              {canManage && member.role !== "OWNER" ? (
+                <button
+                  className="rounded-md p-1.5 text-ink-3 hover:bg-[var(--destructive-wash)] hover:text-danger"
+                  onClick={() => setMemberToRemove(member)}
+                  title="Remove member"
+                  type="button"
+                >
+                  <Icon className="text-[17px]">person_remove</Icon>
+                </button>
+              ) : null}
+            </div>
+          ))}
+        </div>
+        {canManage ? (
+          <div className="mt-6 border-t border-line pt-5">
+            <p className="mb-2 text-sm font-medium text-ink">
+              Add organization member
+            </p>
+            {!organizationMembers.length && !error ? (
+              <p className="text-sm text-ink-3">Loading members...</p>
+            ) : availableMembers.length === 0 ? (
+              <p className="text-sm text-ink-3">
+                All organization members are already on this board.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {availableMembers.map((member) => (
+                  <button
+                    className="rounded-md bg-surface-raised px-3 py-2 text-xs font-medium text-ink-2 hover:bg-[var(--surface-container-high)] hover:text-ink"
+                    key={member.id}
+                    onClick={() => void addMember(member.id)}
+                    type="button"
+                  >
+                    Add {member.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : null}
+      </section>
+      <ConfirmDialog
+        isOpen={Boolean(memberToRemove)}
+        message={
+          memberToRemove ? `Remove ${memberToRemove.name} from this board?` : ""
+        }
+        onClose={() => setMemberToRemove(null)}
+        onConfirm={() =>
+          memberToRemove ? removeMember(memberToRemove) : undefined
+        }
+      />
+    </div>
+  );
+}
+
+function ConfirmDialog({
+  isOpen,
+  message,
+  onClose,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  message: string;
+  onClose: () => void;
+  onConfirm: () => void | Promise<void>;
+}) {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm">
+      <section className="w-full max-w-sm rounded-lg border border-line bg-surface p-5 shadow-[var(--shadow-md)]">
+        <h2 className="text-base font-semibold text-ink">Confirm action</h2>
+        <p className="mt-2 text-sm text-ink-2">{message}</p>
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            className="h-9 rounded-md bg-surface-raised px-3 text-sm font-medium text-ink"
+            onClick={onClose}
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            className="h-9 rounded-md bg-danger px-3 text-sm font-medium text-danger-fg"
+            onClick={() => void onConfirm()}
+            type="button"
+          >
+            Confirm
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function BoardColumn({
+  canManage,
+  list,
+  lists,
+  onAddCard,
+  onDeleteCard,
+  onDeleteList,
+  onEditCard,
+  onEditList,
+  onMoveCard,
+  onDropCard,
+  onDragStart,
+  onDragEnd,
+}: {
+  canManage: boolean;
+  list: MockList;
+  lists: MockList[];
+  onAddCard: () => void;
+  onDeleteCard: (card: MockCard) => void;
+  onDeleteList: (list: MockList) => void;
+  onEditCard: (card: MockCard) => void;
+  onEditList: (list: MockList) => void;
+  onMoveCard: (card: MockCard, targetListId: string) => void;
+  onDropCard: (position: number) => void;
+  onDragStart: (card: MockCard) => void;
+  onDragEnd: () => void;
+}) {
   const colors = [
     "bg-ink-3",
     "bg-[var(--purple)]",
@@ -521,26 +1079,76 @@ function BoardColumn({ list }: { list: MockList }) {
   ];
   const color = colors[Math.abs(list.title.length) % colors.length];
   return (
-    <div className="flex min-h-[460px] flex-col gap-4 rounded-xl bg-surface/60 p-4 shadow-sm">
-      <div className="flex items-center justify-between pb-1">
+    <div
+      className="flex min-h-[300px] min-w-[260px] shrink-0 flex-col gap-2 rounded-lg border border-line bg-surface/70 p-3 shadow-[var(--shadow-sm)] lg:max-h-[calc(100vh-300px)]"
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={() => onDropCard(list.cards.length)}
+    >
+      <div className="flex items-center justify-between border-b border-line pb-2">
         <div className="flex items-center gap-2">
           <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
-          <h2 className="text-base font-semibold text-accent">{list.title}</h2>
+          <h2 className="text-sm font-semibold text-ink">{list.title}</h2>
           <span className="rounded-full bg-[var(--surface-container)] px-2 py-0.5 font-mono text-[10px] text-ink-2">
             {list.cards.length}
           </span>
         </div>
-        <Icon className="text-[18px] text-ink-3">add</Icon>
+        <div className="flex items-center gap-1">
+          <button
+            className="rounded p-1 text-ink-3 hover:bg-[var(--surface-container)] hover:text-ink"
+            onClick={onAddCard}
+            title="Add card"
+            type="button"
+          >
+            <Icon className="text-[17px]">add</Icon>
+          </button>
+          {canManage ? (
+            <>
+              <button
+                className="rounded p-1 text-ink-3 hover:bg-[var(--surface-container)] hover:text-ink"
+                onClick={() => onEditList(list)}
+                title="Edit list"
+                type="button"
+              >
+                <Icon className="text-[17px]">edit</Icon>
+              </button>
+              <button
+                className="rounded p-1 text-ink-3 hover:bg-[var(--destructive-wash)] hover:text-danger"
+                onClick={() => onDeleteList(list)}
+                title="Delete list"
+                type="button"
+              >
+                <Icon className="text-[17px]">delete</Icon>
+              </button>
+            </>
+          ) : null}
+        </div>
       </div>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-1 flex-col gap-2 overflow-y-auto pr-1">
         {list.cards.length > 0 ? (
-          list.cards.map((card) => <TaskCard card={card} key={card.id} />)
+          list.cards.map((card, index) => (
+            <TaskCard
+              card={card}
+              key={card.id}
+              lists={lists}
+              onDelete={() => onDeleteCard(card)}
+              onEdit={() => onEditCard(card)}
+              onMove={(targetListId) => onMoveCard(card, targetListId)}
+              onDrop={() => onDropCard(index)}
+              onDragStart={() => onDragStart(card)}
+              onDragEnd={onDragEnd}
+            />
+          ))
         ) : (
-          <div className="rounded-lg bg-[var(--surface-container-low)] p-6 text-center">
+          <div className="rounded-md bg-[var(--surface-container-low)] p-4 text-center">
             <Icon className="text-ink-3">post_add</Icon>
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
-              Empty Column Tray
-            </p>
+            <p className="text-xs text-ink-3">No cards yet</p>
+            <button
+              className="mt-2 text-xs font-medium text-accent hover:underline"
+              onClick={onAddCard}
+              type="button"
+            >
+              + Add card
+            </button>
           </div>
         )}
       </div>
@@ -548,21 +1156,64 @@ function BoardColumn({ list }: { list: MockList }) {
   );
 }
 
-function TaskCard({ card }: { card: MockCard }) {
+function TaskCard({
+  card,
+  lists,
+  onDelete,
+  onEdit,
+  onMove,
+  onDrop,
+  onDragStart,
+  onDragEnd,
+}: {
+  card: MockCard;
+  lists: MockList[];
+  onDelete: () => void;
+  onEdit: () => void;
+  onMove: (listId: string) => void;
+  onDrop: (position: number) => void;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+}) {
   return (
-    <article className="rounded-lg bg-surface p-4 shadow-sm">
+    <article
+      className="cursor-grab rounded-md border border-line bg-surface p-3 shadow-[var(--shadow-sm)] active:cursor-grabbing"
+      draggable
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={(event) => {
+        event.stopPropagation();
+        onDrop(0);
+      }}
+    >
       <div className="flex items-center justify-between">
         <span
           className={`font-mono text-[11px] font-semibold uppercase tracking-[0.08em] ${card.done ? "text-success" : "text-[var(--role-owner-fg)]"}`}
         >
           {card.labels?.[0] ?? "Task"}
         </span>
-        <span className="font-mono text-[10px] font-semibold text-accent">
-          {card.priority ?? card.meta}
-        </span>
+        <div className="flex items-center gap-1">
+          <button
+            className="rounded p-1 text-ink-3 hover:text-ink"
+            onClick={onEdit}
+            title="Edit card"
+            type="button"
+          >
+            <Icon className="text-[15px]">edit</Icon>
+          </button>
+          <button
+            className="rounded p-1 text-ink-3 hover:text-danger"
+            onClick={onDelete}
+            title="Delete card"
+            type="button"
+          >
+            <Icon className="text-[15px]">delete</Icon>
+          </button>
+        </div>
       </div>
       <h3
-        className={`mt-2 text-[13px] font-medium text-ink ${card.done ? "line-through opacity-70" : ""}`}
+        className={`mt-1 text-[13px] font-medium leading-5 text-ink ${card.done ? "line-through opacity-70" : ""}`}
       >
         {card.title}
       </h3>
@@ -580,7 +1231,20 @@ function TaskCard({ card }: { card: MockCard }) {
         {card.meta ? (
           <span className="font-mono text-[10px] text-ink-2">{card.meta}</span>
         ) : (
-          <Icon className="text-[14px] text-ink-3">schedule</Icon>
+          <select
+            className="max-w-[120px] rounded bg-[var(--surface-container)] px-1.5 py-1 text-[10px] text-ink-2 outline-none"
+            onChange={(event) => onMove(event.target.value)}
+            value={card.listId ?? ""}
+          >
+            <option value={card.listId ?? ""}>Move card...</option>
+            {lists
+              .filter((list) => list.id !== card.listId)
+              .map((list) => (
+                <option key={list.id} value={list.id}>
+                  {list.title}
+                </option>
+              ))}
+          </select>
         )}
       </div>
     </article>
@@ -643,15 +1307,18 @@ function CreateBoardDialog({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (input: { description: string; title: string }) => void;
+  onCreate: (input: {
+    description: string;
+    title: string;
+  }) => void | Promise<void>;
 }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!title.trim()) return;
-    onCreate({ description: description.trim(), title: title.trim() });
+    await onCreate({ description: description.trim(), title: title.trim() });
     setTitle("");
     setDescription("");
     onClose();
@@ -800,6 +1467,95 @@ function DeleteBoardDialog({
           <Icon className="text-[17px]">delete_forever</Icon>Delete Board
         </button>
       </div>
+    </DialogShell>
+  );
+}
+
+function ListDialog({
+  initialTitle = "",
+  isOpen,
+  onClose,
+  onSave,
+  title,
+}: {
+  initialTitle?: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (title: string) => void | Promise<void>;
+  title: string;
+}) {
+  const [value, setValue] = useState(initialTitle);
+
+  if (!isOpen) return null;
+  return (
+    <DialogShell
+      onClose={onClose}
+      subtitle="Organize cards into a focused workflow stage."
+      title={title}
+    >
+      <form
+        className="space-y-4"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          if (value.trim()) await onSave(value.trim());
+        }}
+      >
+        <TextInput
+          label="List Name"
+          onChange={setValue}
+          required
+          value={value}
+        />
+        <DialogActions onClose={onClose} submitLabel="Save List" />
+      </form>
+    </DialogShell>
+  );
+}
+
+function CardDialog({
+  card,
+  isOpen,
+  onClose,
+  onSave,
+}: {
+  card?: MockCard;
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (title: string, description: string) => void | Promise<void>;
+}) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+
+  if (!isOpen) return null;
+  return (
+    <DialogShell
+      onClose={onClose}
+      subtitle="Capture the work, context, and next action for this card."
+      title={card ? "Edit Card" : "Create Card"}
+    >
+      <form
+        className="space-y-4"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          if (title.trim()) await onSave(title.trim(), description.trim());
+        }}
+      >
+        <TextInput
+          label="Card Title"
+          onChange={setTitle}
+          required
+          value={title}
+        />
+        <TextareaInput
+          label="Description"
+          onChange={setDescription}
+          value={description}
+        />
+        <DialogActions
+          onClose={onClose}
+          submitLabel={card ? "Save Card" : "Create Card"}
+        />
+      </form>
     </DialogShell>
   );
 }

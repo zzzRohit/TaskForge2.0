@@ -20,8 +20,8 @@ export function LoginPage() {
   const [notice, setNotice] = useState("");
 
   function quickFill() {
-    setEmail("sarah@taskforge.dev");
-    setPassword("taskforge-demo");
+    setEmail("admin@taskforge.test");
+    setPassword("AdminPass123!");
     setErrors({});
     setNotice("");
   }
@@ -75,7 +75,7 @@ export function LoginPage() {
             >
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
               <span className="text-ink-2">Quick fill:</span>
-              <span>sarah@taskforge.dev</span>
+              <span>admin@taskforge.test</span>
               <Icon className="text-[14px]">arrow_forward</Icon>
             </button>
           </div>
@@ -99,10 +99,16 @@ export function LoginPage() {
             />
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-[13px] font-medium text-ink" htmlFor="password">
+                <label
+                  className="text-[13px] font-medium text-ink"
+                  htmlFor="password"
+                >
                   Password
                 </label>
-                <a className="text-[13px] text-ink-2 hover:text-ink" href="#forgot">
+                <a
+                  className="text-[13px] text-ink-2 hover:text-ink"
+                  href="#forgot"
+                >
                   Forgot password?
                 </a>
               </div>
@@ -138,7 +144,14 @@ export function LoginPage() {
               disabled={isLoading}
               type="submit"
             >
-              {isLoading ? <Spinner /> : <><span>Sign in</span><Icon className="text-[16px]">arrow_forward</Icon></>}
+              {isLoading ? (
+                <Spinner />
+              ) : (
+                <>
+                  <span>Sign in</span>
+                  <Icon className="text-[16px]">arrow_forward</Icon>
+                </>
+              )}
             </button>
           </form>
 
@@ -195,7 +208,9 @@ export function SignupPage() {
         name: form.name,
         password: form.password,
       });
-      setSuccess(`Verification link dispatched to ${form.email}. Check your inbox.`);
+      setSuccess(
+        `Verification link dispatched to ${form.email}. Check your inbox.`,
+      );
       window.setTimeout(() => navigate("/login"), 700);
     } catch {
       setErrors({ form: "An error occurred. Please try again." });
@@ -214,7 +229,9 @@ export function SignupPage() {
                 <Icon className="text-[16px]">check</Icon>
               </span>
               <div>
-                <h2 className="font-semibold text-ink">Account created successfully</h2>
+                <h2 className="font-semibold text-ink">
+                  Account created successfully
+                </h2>
                 <p className="mt-1 text-[13px] text-ink-2">{success}</p>
               </div>
             </div>
@@ -232,12 +249,43 @@ export function SignupPage() {
             </p>
           </div>
 
-          {errors.form ? <p className="mb-4 text-sm text-danger">{errors.form}</p> : null}
+          {errors.form ? (
+            <p className="mb-4 text-sm text-danger">{errors.form}</p>
+          ) : null}
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <AuthField label="Full name" value={form.name} error={errors.name} onChange={(event) => updateField("name", event.target.value)} placeholder="Jane Doe" />
-            <AuthField label="Work email" value={form.email} error={errors.email} onChange={(event) => updateField("email", event.target.value)} placeholder="sarah@taskforge.dev" type="email" />
-            <AuthField label="Password" value={form.password} error={errors.password} onChange={(event) => updateField("password", event.target.value)} placeholder="Min. 8 characters" type="password" />
-            <AuthField label="Confirm password" value={form.confirmPassword} error={errors.confirmPassword} onChange={(event) => updateField("confirmPassword", event.target.value)} placeholder="Repeat password" type="password" />
+            <AuthField
+              label="Full name"
+              value={form.name}
+              error={errors.name}
+              onChange={(event) => updateField("name", event.target.value)}
+              placeholder="Jane Doe"
+            />
+            <AuthField
+              label="Work email"
+              value={form.email}
+              error={errors.email}
+              onChange={(event) => updateField("email", event.target.value)}
+              placeholder="sarah@taskforge.dev"
+              type="email"
+            />
+            <AuthField
+              label="Password"
+              value={form.password}
+              error={errors.password}
+              onChange={(event) => updateField("password", event.target.value)}
+              placeholder="Min. 8 characters"
+              type="password"
+            />
+            <AuthField
+              label="Confirm password"
+              value={form.confirmPassword}
+              error={errors.confirmPassword}
+              onChange={(event) =>
+                updateField("confirmPassword", event.target.value)
+              }
+              placeholder="Repeat password"
+              type="password"
+            />
             <label className="flex cursor-pointer items-start gap-3 text-[13px] text-ink-2">
               <input
                 checked={form.terms}
@@ -246,11 +294,31 @@ export function SignupPage() {
                 type="checkbox"
               />
               <span>
-                I agree to the <a className="font-medium text-ink hover:underline" href="#terms">Terms of Service</a> and <a className="font-medium text-ink hover:underline" href="#privacy">Privacy Policy</a>.
-                {errors.terms ? <span className="block pt-1 text-danger">{errors.terms}</span> : null}
+                I agree to the{" "}
+                <a
+                  className="font-medium text-ink hover:underline"
+                  href="#terms"
+                >
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a
+                  className="font-medium text-ink hover:underline"
+                  href="#privacy"
+                >
+                  Privacy Policy
+                </a>
+                .
+                {errors.terms ? (
+                  <span className="block pt-1 text-danger">{errors.terms}</span>
+                ) : null}
               </span>
             </label>
-            <button className="flex h-10 w-full items-center justify-center gap-2 rounded-md bg-[var(--accent-hover)] text-base font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70" disabled={isLoading} type="submit">
+            <button
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-md bg-[var(--accent-hover)] text-base font-semibold text-white shadow-sm hover:opacity-90 disabled:opacity-70"
+              disabled={isLoading}
+              type="submit"
+            >
               {isLoading ? <Spinner /> : "Create Account"}
             </button>
           </form>
@@ -258,7 +326,9 @@ export function SignupPage() {
           <div className="-mx-8 -mb-8 mt-6 rounded-b-xl bg-gradient-to-b from-transparent to-[var(--surface-container-low)]/40 px-8 pb-8 pt-5 sm:-mx-10 sm:-mb-10">
             <div className="mb-4 flex items-center gap-3">
               <div className="h-px flex-1 bg-[var(--surface-container-high)]" />
-              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-2">Or continue with</span>
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-2">
+                Or continue with
+              </span>
               <div className="h-px flex-1 bg-[var(--surface-container-high)]" />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -267,7 +337,10 @@ export function SignupPage() {
             </div>
             <p className="mt-5 text-center text-[13px] text-ink-2">
               Already have an account?{" "}
-              <Link className="font-medium text-ink hover:underline" to="/login">
+              <Link
+                className="font-medium text-ink hover:underline"
+                to="/login"
+              >
                 Log in
               </Link>
             </p>
@@ -289,7 +362,12 @@ function AuthCanvas({ children }: { children: ReactNode }) {
   );
 }
 
-function AuthField(props: InputHTMLAttributes<HTMLInputElement> & { label: string; error?: string }) {
+function AuthField(
+  props: InputHTMLAttributes<HTMLInputElement> & {
+    label: string;
+    error?: string;
+  },
+) {
   const { error, label, ...inputProps } = props;
   return (
     <div className="space-y-1.5 text-left">
@@ -297,7 +375,9 @@ function AuthField(props: InputHTMLAttributes<HTMLInputElement> & { label: strin
         <label className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-2">
           {label}
         </label>
-        {error ? <span className="text-[13px] text-danger">{error}</span> : null}
+        {error ? (
+          <span className="text-[13px] text-danger">{error}</span>
+        ) : null}
       </div>
       <input
         className={`h-10 w-full rounded-lg bg-surface px-3.5 text-[13px] text-ink shadow-sm outline-none placeholder:text-line-strong focus:bg-surface ${
@@ -312,21 +392,37 @@ function AuthField(props: InputHTMLAttributes<HTMLInputElement> & { label: strin
 function SecurityFooter({ includeSla = false }: { includeSla?: boolean }) {
   return (
     <div className="mt-8 flex flex-wrap items-center justify-center gap-4 font-mono text-[10px] font-medium uppercase text-ink-3">
-      <span className="flex items-center gap-1.5"><Icon className="text-[13px]">lock</Icon>256-bit encryption</span>
+      <span className="flex items-center gap-1.5">
+        <Icon className="text-[13px]">lock</Icon>256-bit encryption
+      </span>
       <span>•</span>
-      <span className="flex items-center gap-1.5"><Icon className="text-[13px]">verified_user</Icon>SOC-2 certified</span>
-      {includeSla ? <><span>•</span><span className="flex items-center gap-1.5"><Icon className="text-[13px]">bolt</Icon>99.99% SLA</span></> : null}
+      <span className="flex items-center gap-1.5">
+        <Icon className="text-[13px]">verified_user</Icon>SOC-2 certified
+      </span>
+      {includeSla ? (
+        <>
+          <span>•</span>
+          <span className="flex items-center gap-1.5">
+            <Icon className="text-[13px]">bolt</Icon>99.99% SLA
+          </span>
+        </>
+      ) : null}
     </div>
   );
 }
 
 function Spinner() {
-  return <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />;
+  return (
+    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+  );
 }
 
 function SsoButton({ children }: { children: ReactNode }) {
   return (
-    <button className="h-9 rounded-md bg-surface text-sm font-medium text-ink shadow-sm hover:bg-surface-raised" type="button">
+    <button
+      className="h-9 rounded-md bg-surface text-sm font-medium text-ink shadow-sm hover:bg-surface-raised"
+      type="button"
+    >
       {children}
     </button>
   );

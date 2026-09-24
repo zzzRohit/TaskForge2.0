@@ -36,6 +36,34 @@ export type Board = {
   updatedAt: string;
 };
 
+export type BoardMember = {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl: string | null;
+  role: "OWNER" | "MEMBER";
+  createdAt: string;
+};
+
+export type BoardList = {
+  id: string;
+  title: string;
+  position: number;
+  boardId: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BoardCard = {
+  id: string;
+  title: string;
+  description: string | null;
+  position: number;
+  listId: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Role = "OWNER" | "ADMIN" | "MEMBER";
 
 export type MockOrganization = Organization & {
@@ -58,6 +86,8 @@ export type MockBoard = Board & {
 
 export type MockCard = {
   id: string;
+  listId?: string;
+  position?: number;
   title: string;
   description?: string;
   labels?: string[];

@@ -1,9 +1,9 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
+  provider = "postgresql"
 }
 
 // ==============================
@@ -11,18 +11,18 @@ datasource db {
 // ==============================
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  avatarUrl    String?
+  id            String               @id @default(cuid())
+  name          String
+  email         String               @unique
+  passwordHash  String
+  avatarUrl     String?
   organizations OrganizationMember[]
   ownedBoards   Board[]
   boardMembers  BoardMember[]
   comments      Comment[]
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ==============================
@@ -30,14 +30,14 @@ model User {
 // ==============================
 
 model Organization {
-  id          String   @id @default(cuid())
-  name        String
+  id   String @id @default(cuid())
+  name String
 
-  members     OrganizationMember[]
-  boards      Board[]
+  members OrganizationMember[]
+  boards  Board[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // ==============================
@@ -45,17 +45,17 @@ model Organization {
 // ==============================
 
 model OrganizationMember {
-  id             String       @id @default(cuid())
+  id String @id @default(cuid())
 
   organizationId String
   userId         String
 
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  role           OrganizationRole @default(MEMBER)
+  role OrganizationRole @default(MEMBER)
 
-  createdAt      DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([organizationId, userId])
   @@index([userId])
@@ -66,21 +66,21 @@ model OrganizationMember {
 // ==============================
 
 model Board {
-  id             String       @id @default(cuid())
-  title          String
-  description    String?
+  id          String  @id @default(cuid())
+  title       String
+  description String?
 
   organizationId String
   ownerId        String
 
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  owner          User         @relation(fields: [ownerId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner        User         @relation(fields: [ownerId], references: [id])
 
-  members        BoardMember[]
-  lists          List[]
+  members BoardMember[]
+  lists   List[]
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([organizationId])
   @@index([ownerId])
@@ -91,15 +91,15 @@ model Board {
 // ==============================
 
 model BoardMember {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  boardId   String
-  userId    String
+  boardId String
+  userId  String
 
-  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  role      BoardRole @default(MEMBER)
+  role BoardRole @default(MEMBER)
 
   createdAt DateTime @default(now())
 
@@ -112,14 +112,14 @@ model BoardMember {
 // ==============================
 
 model List {
-  id        String   @id @default(cuid())
-  title     String
-  position  Float
+  id       String @id @default(cuid())
+  title    String
+  position Float
 
-  boardId   String
+  boardId String
 
-  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  cards     Card[]
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cards Card[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -132,18 +132,18 @@ model List {
 // ==============================
 
 model Card {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   title       String
   description String?
   position    Float
 
-  listId      String
+  listId String
 
-  list        List     @relation(fields: [listId], references: [id], onDelete: Cascade)
-  comments    Comment[]
+  list     List      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  comments Comment[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([listId])
 }
@@ -153,14 +153,14 @@ model Card {
 // ==============================
 
 model Comment {
-  id        String   @id @default(cuid())
-  content   String
+  id      String @id @default(cuid())
+  content String
 
-  cardId    String
-  userId    String
+  cardId String
+  userId String
 
-  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

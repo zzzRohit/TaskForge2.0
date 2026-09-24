@@ -36,3 +36,18 @@ export function getStoredUser(): User | null {
 export function logout(): void {
   localStorage.removeItem("taskforge.user");
 }
+
+export async function getCurrentUser(): Promise<User> {
+  const response = await api.get<User>("/auth/me");
+  localStorage.setItem("taskforge.user", JSON.stringify(response.data));
+  return response.data;
+}
+
+export async function updateCurrentUser(input: {
+  name?: string;
+  avatarUrl?: string | null;
+}): Promise<User> {
+  const response = await api.patch<User>("/auth/me", input);
+  localStorage.setItem("taskforge.user", JSON.stringify(response.data));
+  return response.data;
+}

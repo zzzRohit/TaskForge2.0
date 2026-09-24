@@ -65,3 +65,29 @@ export const signin = async ({ email, password }: SigninCredentials) => {
     },
   }; // Return the user object if authentication is successful
 };
+
+export const getCurrentUser = async (userId: string) => {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, email: true, avatarUrl: true },
+  });
+};
+
+export const updateCurrentUser = async ({
+  userId,
+  name,
+  avatarUrl,
+}: {
+  userId: string;
+  name?: string;
+  avatarUrl?: string | null;
+}) => {
+  return prisma.user.update({
+    where: { id: userId },
+    data: {
+      ...(name !== undefined && { name }),
+      ...(avatarUrl !== undefined && { avatarUrl }),
+    },
+    select: { id: true, name: true, email: true, avatarUrl: true },
+  });
+};

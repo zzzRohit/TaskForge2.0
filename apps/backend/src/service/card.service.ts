@@ -107,7 +107,7 @@ export const cardService = {
       throw new AppError("List not found", 404);
     }
 
-    await assertOrganizationMember(list.board.organizationId, userId);
+    await assertBoardMember(list.board.organizationId, list.id, userId);
 
     const cards = await prisma.card.findMany({
       where: {
@@ -141,7 +141,11 @@ export const cardService = {
       throw new AppError("Card not found", 404);
     }
 
-    await assertOrganizationMember(card.list.board.organizationId, userId);
+    await assertBoardMember(
+      card.list.board.organizationId,
+      card.listId,
+      userId,
+    );
 
     const { list, ...cardData } = card;
     return cardData;
@@ -220,7 +224,11 @@ export const cardService = {
     }
 
     // 3. Check organization membership
-    await assertOrganizationMember(card.list.board.organizationId, userId);
+    await assertBoardMember(
+      card.list.board.organizationId,
+      card.listId,
+      userId,
+    );
 
     // 4. Make sure target list belongs to same organization
     if (targetList.board.organizationId !== card.list.board.organizationId) {
@@ -331,20 +339,36 @@ export const cardService = {
   },
 };
 
-async function assertOrganizationMember(
+async function assertBoardMember(
   organizationId: string,
+  listId: string,
   userId: string,
 ) {
-  const membership = await prisma.organizationMember.findUnique({
-    where: {
-      organizationId_userId: {
-        organizationId,
-        userId,
+  const list = await prisma.list.findUnique({
+    where: { id: listId },
+    select: {
+      board: {
+        select: {
+          ownerId: true,
+          members: { where: { userId }, select: { userId: true } },
+        },
       },
     },
   });
 
-  if (!membership) {
+  const organizationMembership = await prisma.organizationMember.findUnique({
+    where: { organizationId_userId: { organizationId, userId } },
+    select: { role: true },
+  });
+  const hasBoardAccess = Boolean(
+    list &&
+    (list.board.ownerId === userId ||
+      list.board.members.length > 0 ||
+      organizationMembership?.role === "OWNER" ||
+      organizationMembership?.role === "ADMIN"),
+  );
+
+  if (!hasBoardAccess) {
     throw new AppError("You do not have access to this card", 403);
   }
 }

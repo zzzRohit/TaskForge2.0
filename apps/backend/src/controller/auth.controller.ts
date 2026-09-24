@@ -19,3 +19,22 @@ export const signin = async (request: Request, response: Response) => {
     user: result.user,
   });
 };
+
+export const me = async (request: Request, response: Response) => {
+  const user = await authservice.getCurrentUser(request.userId!);
+  if (!user) return response.status(404).json({ error: "User not found" });
+  return response.status(200).json(user);
+};
+
+export const updateMe = async (request: Request, response: Response) => {
+  const { name, avatarUrl } = request.body;
+  if (name !== undefined && (!name || !name.trim())) {
+    return response.status(400).json({ error: "Name is required" });
+  }
+  const user = await authservice.updateCurrentUser({
+    userId: request.userId!,
+    name: typeof name === "string" ? name.trim() : undefined,
+    avatarUrl,
+  });
+  return response.status(200).json(user);
+};

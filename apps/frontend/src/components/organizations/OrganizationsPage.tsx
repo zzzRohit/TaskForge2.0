@@ -1,19 +1,36 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import {
   createOrganization,
+  addOrganizationMember,
   getOrganizations,
+  getOrganizationMembers,
+  removeOrganizationMember,
+  updateOrganizationMemberRole,
+  type OrganizationMember,
 } from "../../lib/api/organization";
 import { initials } from "../../lib/format";
 import type { ApiOrganization, Role } from "../../types/taskforge";
 import { AppShell, Icon, PageContainer } from "../layout/AppShell";
+import { Breadcrumb } from "../layout/Breadcrumb";
 
-type ViewState = "populated" | "modal" | "loading" | "empty" | "error";
+type ViewState = "populated" | "loading" | "empty" | "error";
 
 export function OrganizationsPage() {
   const [organizations, setOrganizations] = useState<ApiOrganization[]>([]);
   const [viewState, setViewState] = useState<ViewState>("loading");
+
+  async function loadOrganizations() {
+    setViewState("loading");
+    try {
+      const data = await getOrganizations();
+      setOrganizations(data);
+      setViewState(data.length ? "populated" : "empty");
+    } catch {
+      setViewState("error");
+    }
+  }
 
   useEffect(() => {
     getOrganizations()
@@ -21,12 +38,12 @@ export function OrganizationsPage() {
         setOrganizations(data);
         setViewState(data.length ? "populated" : "empty");
       })
-      .catch(() => {
-        setViewState("error");
-      });
+      .catch(() => setViewState("error"));
   }, []);
   const [query, setQuery] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [membersOrganization, setMembersOrganization] =
+    useState<ApiOrganization | null>(null);
 
   const visibleOrganizations = useMemo(
     () =>
@@ -37,18 +54,13 @@ export function OrganizationsPage() {
   );
 
   function openCreate() {
-    setViewState("modal");
     setIsCreateOpen(true);
   }
 
   return (
     <AppShell>
-      <StateBar
-        active={viewState}
-        onCreate={openCreate}
-        onSelect={(state) => setViewState(state)}
-      />
       <PageContainer>
+        <Breadcrumb items={[{ label: "Organizations" }]} />
         <section className="flex flex-col justify-between gap-6 pb-6 md:flex-row md:items-end">
           <div className="max-w-2xl">
             <div className="flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-2">
@@ -89,19 +101,23 @@ export function OrganizationsPage() {
 
         {viewState === "loading" ? <OrganizationSkeleton /> : null}
         {viewState === "empty" ? (
-          <OrganizationEmpty onCreate={openCreate} />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <CreateOrganizationCard onCreate={openCreate} />
+          </div>
         ) : null}
         {viewState === "error" ? (
-          <OrganizationError onRetry={() => setViewState("populated")} />
+          <OrganizationError onRetry={() => void loadOrganizations()} />
         ) : null}
-        {viewState === "populated" || viewState === "modal" ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {viewState === "populated" ? (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {visibleOrganizations.map((organization) => (
               <OrganizationCard
                 key={organization.id}
                 organization={organization}
+                onManageMembers={() => setMembersOrganization(organization)}
               />
             ))}
+            <CreateOrganizationCard onCreate={openCreate} />
           </div>
         ) : null}
       </PageContainer>
@@ -109,69 +125,44 @@ export function OrganizationsPage() {
         isOpen={isCreateOpen}
         onClose={() => {
           setIsCreateOpen(false);
-          setViewState("populated");
         }}
         onCreate={async (name) => {
           const organization = await createOrganization(name);
           setOrganizations((current) => [...current, organization]);
         }}
       />
+      <OrganizationMembersDialog
+        isOpen={Boolean(membersOrganization)}
+        onClose={() => setMembersOrganization(null)}
+        organization={membersOrganization}
+      />
     </AppShell>
   );
 }
 
-function StateBar({
-  active,
-  onCreate,
-  onSelect,
+function OrganizationCard({
+  onManageMembers,
+  organization,
 }: {
-  active: ViewState;
-  onCreate: () => void;
-  onSelect: (state: ViewState) => void;
+  onManageMembers: () => void;
+  organization: ApiOrganization;
 }) {
-  const states: Array<{ label: string; value: ViewState }> = [
-    { label: "Populated list", value: "populated" },
-    { label: "Create Modal", value: "modal" },
-    { label: "Skeleton", value: "loading" },
-    { label: "Empty", value: "empty" },
-    { label: "Error", value: "error" },
-  ];
+  const navigate = useNavigate();
+  const destination = `/organizations/${organization.id}/boards`;
 
   return (
-    <aside className="flex w-full flex-col justify-between gap-3 bg-[var(--surface-container-low)] px-4 py-2.5 shadow-sm lg:flex-row lg:items-center lg:px-6">
-      <div className="flex items-center gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.04em] text-ink-2 shadow-sm">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" />
-          Workspace Route /organizations
-        </span>
-      </div>
-      <div className="flex w-full gap-1 overflow-x-auto rounded-lg bg-surface p-1 shadow-sm lg:w-auto">
-        {states.map((state) => (
-          <button
-            className={`shrink-0 rounded px-2.5 py-1 text-[13px] font-medium ${
-              active === state.value
-                ? "bg-accent text-accent-fg"
-                : "text-ink-2 hover:bg-surface-raised hover:text-ink"
-            }`}
-            key={state.value}
-            onClick={() =>
-              state.value === "modal" ? onCreate() : onSelect(state.value)
-            }
-            type="button"
-          >
-            {state.label}
-          </button>
-        ))}
-      </div>
-    </aside>
-  );
-}
-
-function OrganizationCard({ organization }: { organization: ApiOrganization }) {
-  return (
-    <Link
-      className="group flex min-h-[210px] flex-col justify-between rounded-xl bg-surface p-6 shadow-sm hover:shadow-md"
-      to={`/organizations/${organization.id}/boards`}
+    <article
+      aria-label={`Open ${organization.name}`}
+      className="group flex min-h-[190px] cursor-pointer flex-col justify-between rounded-lg border border-line bg-surface p-5 shadow-[var(--shadow-sm)] hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[var(--shadow-md)]"
+      onClick={() => navigate(destination)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          navigate(destination);
+        }
+      }}
+      role="link"
+      tabIndex={0}
     >
       <div className="flex flex-col gap-4">
         <div className="flex items-start justify-between gap-2">
@@ -180,11 +171,8 @@ function OrganizationCard({ organization }: { organization: ApiOrganization }) {
               {initials(organization.name)}
             </span>
             <div className="min-w-0">
-              <h2 className="truncate text-base font-semibold text-ink">
+              <span className="truncate text-base font-semibold text-ink group-hover:text-accent">
                 {organization.name}
-              </h2>
-              <span className="font-mono text-[10px] uppercase tracking-[0.04em] text-ink-3">
-                {organization.id}
               </span>
             </div>
           </div>
@@ -218,11 +206,274 @@ function OrganizationCard({ organization }: { organization: ApiOrganization }) {
           <span className="h-1.5 w-1.5 rounded-full bg-success" />
           Updated {new Date(organization.updatedAt).toLocaleDateString()}
         </span>
-        <Icon className="text-ink-2 group-hover:translate-x-1 group-hover:text-accent">
-          arrow_forward
-        </Icon>
+        <div className="flex items-center gap-2">
+          {organization.role === "OWNER" || organization.role === "ADMIN" ? (
+            <button
+              className="rounded-md px-2 py-1 text-[12px] font-medium text-ink-2 hover:bg-surface-raised hover:text-ink"
+              onClick={(event) => {
+                event.stopPropagation();
+                onManageMembers();
+              }}
+              type="button"
+            >
+              Members
+            </button>
+          ) : null}
+          <span
+            aria-label={`Open ${organization.name}`}
+            className="text-ink-2 group-hover:translate-x-1 group-hover:text-accent"
+          >
+            <Icon>arrow_forward</Icon>
+          </span>
+        </div>
       </div>
-    </Link>
+    </article>
+  );
+}
+
+function CreateOrganizationCard({ onCreate }: { onCreate: () => void }) {
+  return (
+    <button
+      className="group flex min-h-[190px] flex-col items-center justify-center rounded-lg border border-dashed border-line-strong bg-surface p-5 text-center hover:-translate-y-0.5 hover:border-accent hover:bg-surface-raised"
+      onClick={onCreate}
+      type="button"
+    >
+      <span className="grid h-10 w-10 place-items-center rounded-full bg-surface-raised text-accent group-hover:bg-accent group-hover:text-accent-fg">
+        <Icon>add</Icon>
+      </span>
+      <span className="mt-3 text-sm font-semibold text-ink">
+        Create Organization
+      </span>
+      <span className="mt-1 text-xs text-ink-3">Start a new workspace</span>
+    </button>
+  );
+}
+
+function OrganizationMembersDialog({
+  isOpen,
+  onClose,
+  organization,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  organization: ApiOrganization | null;
+}) {
+  const [members, setMembers] = useState<OrganizationMember[]>([]);
+  const [email, setEmail] = useState("");
+  const [memberToRemove, setMemberToRemove] =
+    useState<OrganizationMember | null>(null);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+
+  useEffect(() => {
+    if (!isOpen || !organization) return;
+
+    getOrganizationMembers(organization.id)
+      .then((data) => {
+        setMembers(data);
+        setState("ready");
+      })
+      .catch(() => setState("error"));
+  }, [isOpen, organization]);
+
+  async function refresh() {
+    if (!organization) return;
+    const data = await getOrganizationMembers(organization.id);
+    setMembers(data);
+  }
+
+  async function addMember() {
+    if (!organization || !email.trim()) return;
+    await addOrganizationMember(organization.id, email.trim());
+    setEmail("");
+    await refresh();
+  }
+
+  async function changeRole(member: OrganizationMember) {
+    if (!organization) return;
+    const nextRole = member.role === "ADMIN" ? "MEMBER" : "ADMIN";
+    await updateOrganizationMemberRole(organization.id, member.id, nextRole);
+    await refresh();
+  }
+
+  async function removeMember(member: OrganizationMember) {
+    if (!organization || member.role === "OWNER") return;
+    await removeOrganizationMember(organization.id, member.id);
+    await refresh();
+    setMemberToRemove(null);
+  }
+
+  if (!isOpen || !organization) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm">
+      <section className="w-full max-w-lg rounded-xl bg-surface p-6 shadow-2xl">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+              Organization members
+            </p>
+            <h2 className="mt-1 text-xl font-semibold text-ink">
+              {organization.name}
+            </h2>
+          </div>
+          <button
+            aria-label="Close members"
+            className="rounded-md p-1 text-ink-3 hover:bg-surface-raised hover:text-ink"
+            onClick={onClose}
+            type="button"
+          >
+            <Icon>close</Icon>
+          </button>
+        </div>
+
+        {state === "loading" ? (
+          <div className="mt-6 space-y-3">
+            {[1, 2, 3].map((item) => (
+              <div
+                className="h-12 animate-pulse rounded-lg bg-surface-raised"
+                key={item}
+              />
+            ))}
+          </div>
+        ) : null}
+        {state === "error" ? (
+          <p className="mt-6 rounded-lg bg-[var(--destructive-wash)] p-3 text-sm text-danger">
+            Unable to load organization members.
+          </p>
+        ) : null}
+        {state === "ready" ? (
+          <div className="mt-6 space-y-2">
+            {members.map((member) => (
+              <div
+                className="flex items-center gap-3 rounded-lg border border-line p-3"
+                key={member.id}
+              >
+                {member.avatarUrl ? (
+                  <img
+                    alt=""
+                    className="h-9 w-9 rounded-full object-cover"
+                    src={member.avatarUrl}
+                  />
+                ) : (
+                  <span className="grid h-9 w-9 place-items-center rounded-full bg-accent text-xs font-semibold text-accent-fg">
+                    {initials(member.name)}
+                  </span>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-ink">
+                    {member.name}
+                  </p>
+                  <p className="truncate text-xs text-ink-3">{member.email}</p>
+                </div>
+                <RolePill role={member.role} />
+                {organization.role === "OWNER" && member.role !== "OWNER" ? (
+                  <button
+                    className="rounded-md p-1.5 text-ink-3 hover:bg-surface-raised hover:text-ink"
+                    onClick={() => void changeRole(member)}
+                    title={
+                      member.role === "ADMIN"
+                        ? "Demote to member"
+                        : "Promote to admin"
+                    }
+                    type="button"
+                  >
+                    <Icon className="text-[17px]">swap_vert</Icon>
+                  </button>
+                ) : null}
+                {member.role === "MEMBER" || organization.role === "OWNER" ? (
+                  <button
+                    className="rounded-md p-1.5 text-ink-3 hover:bg-[var(--destructive-wash)] hover:text-danger"
+                    onClick={() => setMemberToRemove(member)}
+                    title="Remove member"
+                    type="button"
+                  >
+                    <Icon className="text-[17px]">person_remove</Icon>
+                  </button>
+                ) : null}
+              </div>
+            ))}
+            {organization.role === "OWNER" || organization.role === "ADMIN" ? (
+              <form
+                className="mt-5 flex gap-2 border-t border-line pt-5"
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  try {
+                    await addMember();
+                  } catch {
+                    setState("error");
+                  }
+                }}
+              >
+                <input
+                  className="h-9 min-w-0 flex-1 rounded-md bg-surface-raised px-3 text-sm text-ink outline-none"
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="Add member by email"
+                  type="email"
+                  value={email}
+                />
+                <button
+                  className="h-9 rounded-md bg-accent px-3 text-sm font-medium text-accent-fg disabled:opacity-50"
+                  disabled={!email.trim()}
+                  type="submit"
+                >
+                  Add
+                </button>
+              </form>
+            ) : null}
+          </div>
+        ) : null}
+      </section>
+      <ConfirmDialog
+        isOpen={Boolean(memberToRemove)}
+        message={
+          memberToRemove
+            ? `Remove ${memberToRemove.name} from ${organization.name}?`
+            : ""
+        }
+        onClose={() => setMemberToRemove(null)}
+        onConfirm={() =>
+          memberToRemove ? removeMember(memberToRemove) : undefined
+        }
+      />
+    </div>
+  );
+}
+
+function ConfirmDialog({
+  isOpen,
+  message,
+  onClose,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  message: string;
+  onClose: () => void;
+  onConfirm: () => void | Promise<void>;
+}) {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm">
+      <section className="w-full max-w-sm rounded-lg border border-line bg-surface p-5 shadow-[var(--shadow-md)]">
+        <h2 className="text-base font-semibold text-ink">Confirm removal</h2>
+        <p className="mt-2 text-sm text-ink-2">{message}</p>
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            className="h-9 rounded-md bg-surface-raised px-3 text-sm font-medium text-ink"
+            onClick={onClose}
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            className="h-9 rounded-md bg-danger px-3 text-sm font-medium text-danger-fg"
+            onClick={() => void onConfirm()}
+            type="button"
+          >
+            Remove
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -307,30 +558,6 @@ function OrganizationSkeleton() {
   );
 }
 
-function OrganizationEmpty({ onCreate }: { onCreate: () => void }) {
-  return (
-    <section className="flex flex-col items-center justify-center px-4 py-20 text-center">
-      <span className="grid h-16 w-16 place-items-center rounded-2xl bg-[var(--surface-container-high)] text-ink-2 shadow-inner">
-        <Icon className="text-[32px]">folder_off</Icon>
-      </span>
-      <h2 className="mt-4 text-xl font-semibold text-ink">
-        No organizations found
-      </h2>
-      <p className="mt-2 max-w-md text-[15px] text-ink-2">
-        You are not a member of any workspace yet. Create your first workspace
-        to organize engineering boards, track issues, and invite team members.
-      </p>
-      <button
-        className="mt-6 flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-sm font-medium text-accent-fg"
-        onClick={onCreate}
-        type="button"
-      >
-        <Icon className="text-[18px]">add</Icon>Create your first workspace
-      </button>
-    </section>
-  );
-}
-
 function OrganizationError({ onRetry }: { onRetry: () => void }) {
   return (
     <section className="flex flex-col items-center justify-center px-4 py-20 text-center">
@@ -364,7 +591,9 @@ function CreateOrganizationDialog({
   onClose: () => void;
   onCreate: (name: string) => void | Promise<void>;
 }) {
-  const [name, setName] = useState("Acme Design Lab");
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const slug =
     name
       .trim()
@@ -374,8 +603,22 @@ function CreateOrganizationDialog({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await onCreate(name.trim());
-    onClose();
+    const trimmedName = name.trim();
+    if (!trimmedName || isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      setError("");
+      await onCreate(trimmedName);
+      setName("");
+      onClose();
+    } catch {
+      setError(
+        "Unable to create organization. Check the backend and try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   if (!isOpen) return null;
@@ -420,6 +663,11 @@ function CreateOrganizationDialog({
               value={name}
             />
           </label>
+          {error ? (
+            <p className="rounded-md bg-[var(--destructive-wash)] px-3 py-2 text-[13px] text-danger">
+              {error}
+            </p>
+          ) : null}
           <label className="flex flex-col gap-1.5">
             <span className="text-[13px] font-medium text-ink">
               Organization URL
@@ -458,9 +706,10 @@ function CreateOrganizationDialog({
             </button>
             <button
               className="h-9 rounded-md bg-accent px-4 text-sm font-medium text-accent-fg hover:bg-[var(--accent-hover)]"
+              disabled={isSubmitting || !name.trim()}
               type="submit"
             >
-              Create Organization
+              {isSubmitting ? "Creating..." : "Create Organization"}
             </button>
           </div>
         </form>
