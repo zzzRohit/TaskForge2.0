@@ -3,7 +3,30 @@ import { LoginPage, SignupPage } from "./components/auth/AuthPages";
 import { BoardDetailPage, BoardsPage } from "./components/boards/BoardsPage";
 import { OrganizationsPage } from "./components/organizations/OrganizationsPage";
 
+import { useEffect } from "react";
+import { socket } from "./lib/socket";
+
+export default App;
 export function App() {
+  useEffect(() => {
+    console.log("Connecting socket...");
+
+    socket.connect();
+
+    socket.on("connect", () => {
+      console.log("Connected:", socket.id);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Connection error:", error.message);
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("connect_error");
+      socket.disconnect();
+    };
+  }, []);
   return (
     <Routes>
       <Route path="/" element={<Navigate replace to="/login" />} />
