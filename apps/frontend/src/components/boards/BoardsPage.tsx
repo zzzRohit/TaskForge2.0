@@ -38,6 +38,7 @@ import { getStoredUser } from "../../lib/api/auth";
 import type {
   ApiOrganization,
   Board,
+  BoardList,
   BoardMember,
   MockBoard,
   MockCard,
@@ -48,6 +49,7 @@ import { Breadcrumb } from "../layout/Breadcrumb";
 import { socket } from "../../lib/socket";
 
 type BoardView = "grid" | "empty" | "loading";
+const LIST_DRAG_TYPE = "application/x-taskforge-list";
 
 export function BoardsPage() {
   const { organizationId, boardId } = useParams();
@@ -288,18 +290,21 @@ export function BoardDetailPage() {
         setBoard(toMockBoard(boardData));
         setBoardMembers(memberData);
         setBoardLists(
-          listData.map((list) => ({
-            boardId: list.boardId,
-            cards: list.cards.map((card) => ({
-              description: card.description ?? undefined,
-              id: card.id,
-              listId: card.listId,
-              position: card.position,
-              title: card.title,
-            })),
-            id: list.id,
-            title: list.title,
-          })),
+          listData
+            .map((list) => ({
+              boardId: list.boardId,
+              cards: list.cards.map((card) => ({
+                description: card.description ?? undefined,
+                id: card.id,
+                listId: card.listId,
+                position: card.position,
+                title: card.title,
+              })),
+              id: list.id,
+              position: list.position,
+              title: list.title,
+            }))
+            .sort((left, right) => left.position - right.position),
         );
       } catch {
         setLoadError("Unable to load board.");
@@ -316,27 +321,34 @@ export function BoardDetailPage() {
     socket.connect();
     socket.emit("join-board", boardId);
 
+
     return () => {
       socket.emit("leave-board", boardId);
       socket.disconnect();
     };
   }, [boardId]);
   useEffect(() => {
-    const handleListCreated = (newList: MockList) => {
-      setBoardLists((current) => [
-        ...current,
-        {
-          id: newList.id,
-          title: newList.title,
-          boardId: newList.boardId,
-          cards: [],
-        },
-      ]);
+    const handleListCreated = (newList: BoardList) => {
+      setBoardLists((current) => {
+        if (current.some((list) => list.id === newList.id)) return current;
+        return [...current, { ...newList, cards: [] }].sort(
+          (left, right) => left.position - right.position,
+        );
+      });
+    };
+    const handleListUpdated = (updatedList: BoardList) => {
+      replaceList(updatedList.id, (list) => ({
+        ...list,
+        title: updatedList.title,
+        position: updatedList.position,
+      }));
     };
     socket.on("list-created", handleListCreated);
+    socket.on("list-updated", handleListUpdated);
 
     return () => {
       socket.off("list-created", handleListCreated);
+      socket.off("list-updated", handleListUpdated);
     };
   }, []);
 
@@ -374,13 +386,19 @@ export function BoardDetailPage() {
 
   function replaceList(listId: string, update: (list: MockList) => MockList) {
     setBoardLists((current) =>
-      current.map((list) => (list.id === listId ? update(list) : list)),
+      current
+        .map((list) => (list.id === listId ? update(list) : list))
+        .sort((left, right) => left.position - right.position),
     );
   }
 
   async function handleCreateList(title: string) {
-    const created = await createList(currentOrganization.id, currentBoard.id, {
-      position: boardLists.length,
+    await createList(currentOrganization.id, currentBoard.id, {
+      position:
+        boardLists.reduce(
+          (highestPosition, list) => Math.max(highestPosition, list.position),
+          -1,
+        ) + 1,
       title,
     });
 
@@ -388,16 +406,84 @@ export function BoardDetailPage() {
     showToast("List created successfully");
   }
 
-  async function handleSaveList(listId: string, title: string) {
-    const updated = await updateList(
+  async function handleSaveList(
+    listId: string,
+    input: { title?: string; position?: number },
+  ) {
+    await updateList(
       currentOrganization.id,
       currentBoard.id,
       listId,
-      { title },
+      input,
     );
-    replaceList(listId, (list) => ({ ...list, title: updated.title }));
     setEditingList(null);
     showToast("List updated successfully");
+  }
+
+  async function handleDropList(
+    sourceListId: string,
+    targetListId: string,
+    insertAfter: boolean,
+  ) {
+    if (sourceListId === targetListId) return;
+
+    const source = boardLists.find((list) => list.id === sourceListId);
+    const targetIndex = boardLists.findIndex((list) => list.id === targetListId);
+    if (!source || targetIndex === -1) return;
+
+    const reordered = boardLists.filter((list) => list.id !== sourceListId);
+    const adjustedTargetIndex = reordered.findIndex(
+      (list) => list.id === targetListId,
+    );
+    const insertIndex = adjustedTargetIndex + (insertAfter ? 1 : 0);
+    reordered.splice(insertIndex, 0, source);
+    if (reordered.every((list, index) => list.id === boardLists[index]?.id))
+      return;
+
+    const previous = reordered[insertIndex - 1];
+    const next = reordered[insertIndex + 1];
+    const position =
+      previous && next
+        ? (previous.position + next.position) / 2
+        : previous
+          ? previous.position + 1
+          : next
+            ? next.position - 1
+            : 0;
+    const needsReindex =
+      !Number.isFinite(position) ||
+      (previous && position === previous.position) ||
+      (next && position === next.position);
+
+    try {
+      if (needsReindex) {
+        const normalized = reordered.map((list, index) => ({
+          ...list,
+          position: index,
+        }));
+        await Promise.all(
+          normalized.map((list) =>
+            updateList(currentOrganization.id, currentBoard.id, list.id, {
+              position: list.position,
+            }),
+          ),
+        );
+        setBoardLists(normalized);
+      } else {
+        await updateList(currentOrganization.id, currentBoard.id, sourceListId, {
+          position,
+        });
+        setBoardLists(
+          reordered
+            .map((list) =>
+              list.id === sourceListId ? { ...list, position } : list,
+            )
+            .sort((left, right) => left.position - right.position),
+        );
+      }
+    } catch {
+      showToast("Unable to reorder lists");
+    }
   }
 
   async function handleDeleteList(list: MockList) {
@@ -583,6 +669,7 @@ export function BoardDetailPage() {
                 key={list.id}
                 list={list}
                 lists={boardLists}
+                onDropList={handleDropList}
                 onAddCard={() => setCardDialog({ listId: list.id })}
                 onDeleteCard={(card) =>
                   setConfirmation({
@@ -686,7 +773,8 @@ export function BoardDetailPage() {
         isOpen={Boolean(editingList)}
         onClose={() => setEditingList(null)}
         onSave={async (title) => {
-          if (editingList) await handleSaveList(editingList.id, title);
+          if (editingList)
+            await handleSaveList(editingList.id, { title });
         }}
         title="Edit List"
       />
@@ -1082,6 +1170,7 @@ function BoardColumn({
   canManage,
   list,
   lists,
+  onDropList,
   onAddCard,
   onDeleteCard,
   onDeleteList,
@@ -1095,6 +1184,11 @@ function BoardColumn({
   canManage: boolean;
   list: MockList;
   lists: MockList[];
+  onDropList: (
+    sourceListId: string,
+    targetListId: string,
+    insertAfter: boolean,
+  ) => void;
   onAddCard: () => void;
   onDeleteCard: (card: MockCard) => void;
   onDeleteList: (list: MockList) => void;
@@ -1116,10 +1210,39 @@ function BoardColumn({
     <div
       className="flex min-h-[300px] min-w-[260px] shrink-0 flex-col gap-2 rounded-lg border border-line bg-surface/70 p-3 shadow-[var(--shadow-sm)] lg:max-h-[calc(100vh-300px)]"
       onDragOver={(event) => event.preventDefault()}
-      onDrop={() => onDropCard(list.cards.length)}
+      onDrop={(event) => {
+        const sourceListId = event.dataTransfer.getData(LIST_DRAG_TYPE);
+        if (sourceListId) {
+          event.preventDefault();
+          event.stopPropagation();
+          const bounds = event.currentTarget.getBoundingClientRect();
+          onDropList(
+            sourceListId,
+            list.id,
+            event.clientX >= bounds.left + bounds.width / 2,
+          );
+          return;
+        }
+        onDropCard(list.cards.length);
+      }}
     >
       <div className="flex items-center justify-between border-b border-line pb-2">
         <div className="flex items-center gap-2">
+          {canManage ? (
+            <button
+              aria-label={`Reorder ${list.title} list`}
+              className="cursor-grab touch-none text-ink-3 active:cursor-grabbing"
+              draggable
+              onDragStart={(event) => {
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData(LIST_DRAG_TYPE, list.id);
+              }}
+              title="Drag to reorder list"
+              type="button"
+            >
+              <Icon className="text-[17px]">drag_indicator</Icon>
+            </button>
+          ) : null}
           <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
           <h2 className="text-sm font-semibold text-ink">{list.title}</h2>
           <span className="rounded-full bg-[var(--surface-container)] px-2 py-0.5 font-mono text-[10px] text-ink-2">
@@ -1217,6 +1340,7 @@ function TaskCard({
       onDragEnd={onDragEnd}
       onDragOver={(event) => event.preventDefault()}
       onDrop={(event) => {
+        if (event.dataTransfer.getData(LIST_DRAG_TYPE)) return;
         event.stopPropagation();
         onDrop(0);
       }}

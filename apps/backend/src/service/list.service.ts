@@ -52,6 +52,7 @@ export const updateList = async (
     },
     data,
   });
+  
   return updatedList;
 };
 export const deleteList = async (listId: string) => {

@@ -154,6 +154,7 @@ export const lists: MockList[] = [
     id: "todo",
     boardId: "sprint-24",
     title: "To Do",
+    position: 0,
     cards: [
       {
         id: "token-engine",
@@ -181,6 +182,7 @@ export const lists: MockList[] = [
     id: "in-progress",
     boardId: "sprint-24",
     title: "In Progress",
+    position: 1,
     cards: [
       {
         id: "button-motion",
@@ -202,6 +204,7 @@ export const lists: MockList[] = [
     id: "review",
     boardId: "sprint-24",
     title: "Review",
+    position: 2,
     cards: [
       {
         id: "contrast-audit",
@@ -215,6 +218,7 @@ export const lists: MockList[] = [
     id: "done",
     boardId: "sprint-24",
     title: "Done",
+    position: 3,
     cards: [
       {
         id: "typography-sync",
@@ -236,6 +240,7 @@ export const lists: MockList[] = [
     id: "platform-backlog",
     boardId: "platform-api",
     title: "Backlog",
+    position: 0,
     cards: [],
   },
 ];

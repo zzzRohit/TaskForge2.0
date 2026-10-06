@@ -101,5 +101,6 @@ export type MockList = {
   id: string;
   boardId: string;
   title: string;
+  position: number;
   cards: MockCard[];
 };
