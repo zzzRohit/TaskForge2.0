@@ -1,5 +1,6 @@
 import { prisma } from "@taskforge/db";
 import { AppError } from "../utils/app-error";
+import { getIO } from "../lib/socket";
 
 type CreateListInput = {
   title: string;
@@ -18,6 +19,8 @@ export const createList = async ({
       boardId,
     },
   });
+  const io = getIO();
+  io.to(boardId).emit("list-created", list);
   return list;
 };
 export const getListsByBoardId = async (boardId: string) => {

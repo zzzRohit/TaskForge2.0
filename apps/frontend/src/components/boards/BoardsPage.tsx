@@ -45,11 +45,12 @@ import type {
 } from "../../types/taskforge";
 import { AppShell, Icon, PageContainer } from "../layout/AppShell";
 import { Breadcrumb } from "../layout/Breadcrumb";
+import { socket } from "../../lib/socket";
 
 type BoardView = "grid" | "empty" | "loading";
 
 export function BoardsPage() {
-  const { organizationId = "" } = useParams();
+  const { organizationId, boardId } = useParams();
   const [organization, setOrganization] = useState<ApiOrganization | null>(
     null,
   );
@@ -90,6 +91,18 @@ export function BoardsPage() {
 
     loadWorkspace();
   }, [organizationId]);
+  useEffect(() => {
+    if (!boardId) return;
+
+    socket.connect();
+
+    socket.emit("join-board", boardId);
+
+    return () => {
+      socket.emit("leave-board", boardId);
+      socket.disconnect();
+    };
+  }, [boardId]);
   const organizationBoards = useMemo(
     () =>
       boards.filter(
@@ -297,6 +310,35 @@ export function BoardDetailPage() {
 
     loadBoard();
   }, [organizationId, boardId]);
+  useEffect(() => {
+    if (!boardId) return;
+
+    socket.connect();
+    socket.emit("join-board", boardId);
+
+    return () => {
+      socket.emit("leave-board", boardId);
+      socket.disconnect();
+    };
+  }, [boardId]);
+  useEffect(() => {
+    const handleListCreated = (newList: MockList) => {
+      setBoardLists((current) => [
+        ...current,
+        {
+          id: newList.id,
+          title: newList.title,
+          boardId: newList.boardId,
+          cards: [],
+        },
+      ]);
+    };
+    socket.on("list-created", handleListCreated);
+
+    return () => {
+      socket.off("list-created", handleListCreated);
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -341,15 +383,7 @@ export function BoardDetailPage() {
       position: boardLists.length,
       title,
     });
-    setBoardLists((current) => [
-      ...current,
-      {
-        boardId: created.boardId,
-        cards: [],
-        id: created.id,
-        title: created.title,
-      },
-    ]);
+
     setIsCreateListOpen(false);
     showToast("List created successfully");
   }

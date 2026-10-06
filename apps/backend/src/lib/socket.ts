@@ -13,14 +13,24 @@ export const initializeSocket = (server: HttpServer) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("Client connected:", socket.id);
+  console.log("Client connected:", socket.id);
 
-    socket.on("disconnect", () => {
-      console.log("Client disconnected:", socket.id);
-    });
+  socket.on("join-board", (boardId: string) => {
+    socket.join(boardId);
+
+    console.log(`Socket ${socket.id} joined board ${boardId}`);
   });
 
-  return io;
+  socket.on("leave-board", (boardId: string) => {
+    socket.leave(boardId);
+
+    console.log(`Socket ${socket.id} left board ${boardId}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+  });
+});
 };
 
 export const getIO = () => {
