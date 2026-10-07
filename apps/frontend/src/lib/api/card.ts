@@ -19,25 +19,36 @@ export async function createCard(
 }
 
 export async function updateCard(
+  boardId: string,
   cardId: string,
   input: Partial<CardInput>,
 ): Promise<BoardCard> {
-  const response = await api.patch<BoardCard>(`/cards/${cardId}`, input);
+  const response = await api.patch<BoardCard>(
+    `/boards/${boardId}/cards/${cardId}`,
+    input,
+  );
   return response.data;
 }
 
-export async function deleteCard(cardId: string): Promise<void> {
-  await api.delete(`/cards/${cardId}`);
+export async function deleteCard(
+  boardId: string,
+  cardId: string,
+): Promise<void> {
+  await api.delete(`/boards/${boardId}/cards/${cardId}`);
 }
 
 export async function moveCard(
+  boardId: string,
   cardId: string,
   targetListId: string,
   position: number,
 ): Promise<BoardCard> {
-  const response = await api.patch<BoardCard>(`/card/${cardId}/move`, {
-    position,
-    targetListId,
-  });
+  const response = await api.patch<BoardCard>(
+    `/boards/${boardId}/cards/${cardId}/move`,
+    {
+      position,
+      targetListId,
+    },
+  );
   return response.data;
 }

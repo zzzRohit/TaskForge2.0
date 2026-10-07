@@ -357,17 +357,27 @@ export function BoardDetailPage() {
         }),
       );
     };
+    const handleCardUpdate = (updatedCard : MockCard)=>{
+      replaceCard(updatedCard.id, (card) => ({
+        ...card,
+        title: updatedCard.title,
+        description: updatedCard.description
+        
+      }))
+    }
 
     socket.on("list-created", handleListCreated);
     socket.on("list-updated", handleListUpdated);
     socket.on("list-deleted", handleListDeleted);
     socket.on("card-created", handleCardCreated);
+    socket.on("card-updated" , handleCardUpdate);
 
     return () => {
       socket.off("list-created", handleListCreated);
       socket.off("list-updated", handleListUpdated);
       socket.off("list-deleted", handleListDeleted);
       socket.off("card-created", handleCardCreated);
+      socket.off("card-updated" , handleCardUpdate);
     };
   }, []);
 
@@ -408,6 +418,15 @@ export function BoardDetailPage() {
       current
         .map((list) => (list.id === listId ? update(list) : list))
         .sort((left, right) => left.position - right.position),
+    );
+  }
+  function replaceCard(cardId: string, update: (card: MockCard) => MockCard) {
+    setBoardLists((current) =>
+      current.map((list) =>
+        list.cards.some((card) => card.id === cardId)
+          ? { ...list, cards: list.cards.map((card) => (card.id === cardId ? update(card) : card)) }
+          : list
+      )
     );
   }
 
@@ -544,7 +563,10 @@ export function BoardDetailPage() {
     title: string,
     description: string,
   ) {
-    const updated = await updateCard(cardId, { description, title });
+    const updated = await updateCard(currentBoard.id, cardId, {
+      description,
+      title,
+    });
     setBoardLists((current) =>
       current.map((list) => ({
         ...list,
@@ -564,7 +586,7 @@ export function BoardDetailPage() {
   }
 
   async function handleDeleteCard(card: MockCard) {
-    await deleteCard(card.id);
+    await deleteCard(currentBoard.id, card.id);
     setBoardLists((current) =>
       current.map((list) => ({
         ...list,
@@ -595,7 +617,7 @@ export function BoardDetailPage() {
         return;
     }
 
-    await moveCard(card.id, targetListId, position);
+    await moveCard(currentBoard.id, card.id, targetListId, position);
     setBoardLists((current) =>
       current.map((list) => {
         const withoutCard = list.cards.filter((item) => item.id !== card.id);

@@ -32,7 +32,7 @@ export const cardController = {
     }
   },
   getcard: async (
-    req: Request<{ listId: string }>,
+    req: Request<{ boardId: string; listId: string }>,
     res: Response,
     next: NextFunction,
   ) => {
@@ -49,7 +49,7 @@ export const cardController = {
     }
   },
   getCardById: async (
-    req: Request<{ cardId: string }>,
+    req: Request<{ boardId: string; cardId: string }>,
     res: Response,
     next: NextFunction,
   ) => {
@@ -65,11 +65,12 @@ export const cardController = {
     }
   },
   updateCard: async (
-    req: Request<{ cardId: string }>,
+    req: Request<{ boardId: string; cardId: string }>,
     res: Response,
     next: NextFunction,
   ) => {
     try {
+      const {boardId} = req.params;
       const { title, description } = req.body;
 
       if (title !== undefined && (!title || !title.trim())) {
@@ -83,14 +84,14 @@ export const cardController = {
         description,
       });
       const io = getIO();
-
+      io.to(boardId).emit("card-updated", card);
       return res.status(200).json(card);
     } catch (error) {
       next(error);
     }
   },
   deleteCard: async (
-    req: Request<{ cardId: string }>,
+    req: Request<{ boardId: string; cardId: string }>,
     res: Response,
     next: NextFunction,
   ) => {
@@ -106,7 +107,7 @@ export const cardController = {
     }
   },
   moveCard: async (
-    req: Request<{ cardId: string }>,
+    req: Request<{ boardId: string; cardId: string }>,
     res: Response,
     next: NextFunction,
   ) => {

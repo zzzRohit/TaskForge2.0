@@ -22,7 +22,7 @@ export async function getLists(
   return Promise.all(
     response.data.data.map(async (list) => {
       const cardsResponse = await api.get<BoardCard[]>(
-        `/lists/${list.id}/cards`,
+        `/boards/${boardId}/lists/${list.id}/cards`,
       );
       return { ...list, cards: cardsResponse.data };
     }),
