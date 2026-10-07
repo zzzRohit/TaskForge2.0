@@ -321,7 +321,6 @@ export function BoardDetailPage() {
     socket.connect();
     socket.emit("join-board", boardId);
 
-
     return () => {
       socket.emit("leave-board", boardId);
       socket.disconnect();
@@ -344,16 +343,31 @@ export function BoardDetailPage() {
       }));
     };
     const handleListDeleted = (deletedListId: string) => {
-      setBoardLists((current) => current.filter((list) => list.id !== deletedListId));
+      setBoardLists((current) =>
+        current.filter((list) => list.id !== deletedListId),
+      );
     };
+    const handleCardCreated = (newCard: MockCard) => {
+      console.log("CARD CREATED RECEIVED:", newCard);
+
+      setBoardLists((current) =>
+        current.map((list) => {
+          if (list.id !== newCard.listId) return list;
+          return { ...list, cards: [...list.cards, newCard] };
+        }),
+      );
+    };
+
     socket.on("list-created", handleListCreated);
     socket.on("list-updated", handleListUpdated);
     socket.on("list-deleted", handleListDeleted);
+    socket.on("card-created", handleCardCreated);
 
     return () => {
       socket.off("list-created", handleListCreated);
       socket.off("list-updated", handleListUpdated);
       socket.off("list-deleted", handleListDeleted);
+      socket.off("card-created", handleCardCreated);
     };
   }, []);
 
@@ -415,12 +429,7 @@ export function BoardDetailPage() {
     listId: string,
     input: { title?: string; position?: number },
   ) {
-    await updateList(
-      currentOrganization.id,
-      currentBoard.id,
-      listId,
-      input,
-    );
+    await updateList(currentOrganization.id, currentBoard.id, listId, input);
     setEditingList(null);
     showToast("List updated successfully");
   }
@@ -433,7 +442,9 @@ export function BoardDetailPage() {
     if (sourceListId === targetListId) return;
 
     const source = boardLists.find((list) => list.id === sourceListId);
-    const targetIndex = boardLists.findIndex((list) => list.id === targetListId);
+    const targetIndex = boardLists.findIndex(
+      (list) => list.id === targetListId,
+    );
     if (!source || targetIndex === -1) return;
 
     const reordered = boardLists.filter((list) => list.id !== sourceListId);
@@ -475,9 +486,14 @@ export function BoardDetailPage() {
         );
         setBoardLists(normalized);
       } else {
-        await updateList(currentOrganization.id, currentBoard.id, sourceListId, {
-          position,
-        });
+        await updateList(
+          currentOrganization.id,
+          currentBoard.id,
+          sourceListId,
+          {
+            position,
+          },
+        );
         setBoardLists(
           reordered
             .map((list) =>
@@ -502,7 +518,10 @@ export function BoardDetailPage() {
     title: string,
     description: string,
   ) {
-    const created = await createCard(listId, { description, title });
+    const created = await createCard(currentBoard.id, listId, {
+      description,
+      title,
+    });
     replaceList(listId, (list) => ({
       ...list,
       cards: [
@@ -778,8 +797,7 @@ export function BoardDetailPage() {
         isOpen={Boolean(editingList)}
         onClose={() => setEditingList(null)}
         onSave={async (title) => {
-          if (editingList)
-            await handleSaveList(editingList.id, { title });
+          if (editingList) await handleSaveList(editingList.id, { title });
         }}
         title="Edit List"
       />

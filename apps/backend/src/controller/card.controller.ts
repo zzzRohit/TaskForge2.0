@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import { cardService } from "../service/card.service";
 import { AppError } from "../utils/app-error";
-
+import { getIO } from "../lib/socket";
 export const cardController = {
   createCard: async (
-    req: Request<{ listId: string }>,
+    req: Request<{ listId: string; boardId: string }>,
     res: Response,
     next: NextFunction,
   ) => {
     try {
-      const { listId } = req.params;
+      const { listId, boardId } = req.params;
       const { title, description } = req.body;
 
       if (!title || !title.trim()) {
@@ -22,6 +22,9 @@ export const cardController = {
         description,
         userId: req.userId!,
       });
+      const io = getIO();
+      io.to(boardId).emit("card-created", card);
+      console.log("EMITTING CARD CREATED:");
 
       return res.status(201).json(card);
     } catch (error) {
@@ -79,6 +82,7 @@ export const cardController = {
         title: title?.trim(),
         description,
       });
+      const io = getIO();
 
       return res.status(200).json(card);
     } catch (error) {

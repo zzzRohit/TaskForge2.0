@@ -7,10 +7,14 @@ export type CardInput = {
 };
 
 export async function createCard(
+  boardId: string,
   listId: string,
   input: CardInput,
 ): Promise<BoardCard> {
-  const response = await api.post<BoardCard>(`/lists/${listId}/cards`, input);
+  const response = await api.post<BoardCard>(
+    `/boards/${boardId}/lists/${listId}/cards`,
+    input,
+  );
   return response.data;
 }
 
