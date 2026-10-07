@@ -343,12 +343,17 @@ export function BoardDetailPage() {
         position: updatedList.position,
       }));
     };
+    const handleListDeleted = (deletedListId: string) => {
+      setBoardLists((current) => current.filter((list) => list.id !== deletedListId));
+    };
     socket.on("list-created", handleListCreated);
     socket.on("list-updated", handleListUpdated);
+    socket.on("list-deleted", handleListDeleted);
 
     return () => {
       socket.off("list-created", handleListCreated);
       socket.off("list-updated", handleListUpdated);
+      socket.off("list-deleted", handleListDeleted);
     };
   }, []);
 

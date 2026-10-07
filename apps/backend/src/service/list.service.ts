@@ -1,6 +1,6 @@
 import { prisma } from "@taskforge/db";
-import { AppError } from "../utils/app-error";
 import { getIO } from "../lib/socket";
+import { assertBoardAccess as assertBoardAccessForResource } from "./authorization.service";
 
 type CreateListInput = {
   title: string;
@@ -68,24 +68,5 @@ export const assertBoardAccess = async (
   boardId: string,
   userId: string,
 ) => {
-  const board = await prisma.board.findFirst({
-    where: { id: boardId, organizationId },
-    select: {
-      ownerId: true,
-      members: { where: { userId }, select: { userId: true } },
-      organization: {
-        select: { members: { where: { userId }, select: { role: true } } },
-      },
-    },
-  });
-  const role = board?.organization.members[0]?.role;
-  if (
-    !board ||
-    (board.ownerId !== userId &&
-      board.members.length === 0 &&
-      role !== "OWNER" &&
-      role !== "ADMIN")
-  ) {
-    throw new AppError("You do not have access to this board", 403);
-  }
+  await assertBoardAccessForResource(organizationId, boardId, userId);
 };

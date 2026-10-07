@@ -1,11 +1,14 @@
 import { prisma } from "@taskforge/db";
 import { AppError } from "../utils/app-error";
+import { assertBoardManager, assertBoardAccess } from "./authorization.service";
+
 type CreateBoardInput = {
   organizationId: string;
   title: string;
   description?: string;
   userId: string;
 };
+
 export const createBoard = async (input: CreateBoardInput) => {
   return await prisma.board.create({
     data: {
@@ -22,6 +25,7 @@ export const createBoard = async (input: CreateBoardInput) => {
     },
   });
 };
+
 export const getBoardsByOrganizationId = async (
   organizationId: string,
   userId: string,
@@ -41,6 +45,7 @@ export const getBoardsByOrganizationId = async (
     },
   });
 };
+
 export const getBoardById = async (
   organizationId: string,
   boardId: string,
@@ -74,6 +79,7 @@ export const getBoardById = async (
     },
   });
 };
+
 export const updateBoard = async (input: {
   organizationId: string;
   boardId: string;
@@ -93,6 +99,7 @@ export const updateBoard = async (input: {
   });
   return board;
 };
+
 export const deleteBoard = async (input: {
   organizationId: string;
   boardId: string;
@@ -112,8 +119,11 @@ export const getMembers = async (
   boardId: string,
   userId: string,
 ) => {
+  await assertBoardAccess(organizationId, boardId, userId);
+
   const board = await getBoardById(organizationId, boardId, userId);
   if (!board) return null;
+
   const members = board.members.map((member) => ({
     id: member.user.id,
     name: member.user.name,
@@ -122,6 +132,7 @@ export const getMembers = async (
     role: member.role,
     createdAt: member.createdAt,
   }));
+
   if (!members.some((member) => member.id === board.owner.id)) {
     members.unshift({
       id: board.owner.id,
@@ -132,6 +143,7 @@ export const getMembers = async (
       createdAt: board.createdAt,
     });
   }
+
   return members;
 };
 
@@ -177,29 +189,4 @@ export const removeMember = async ({
   await prisma.boardMember.delete({
     where: { boardId_userId: { boardId, userId } },
   });
-};
-
-export const assertBoardManager = async (
-  organizationId: string,
-  boardId: string,
-  userId: string,
-) => {
-  const board = await prisma.board.findFirst({
-    where: { id: boardId, organizationId },
-    include: {
-      organization: {
-        include: { members: { where: { userId }, select: { role: true } } },
-      },
-    },
-  });
-  const organizationRole = board?.organization.members[0]?.role;
-  if (
-    !board ||
-    (board.ownerId !== userId &&
-      organizationRole !== "OWNER" &&
-      organizationRole !== "ADMIN")
-  ) {
-    throw new AppError("You do not have permission to manage this board", 403);
-  }
-  return board;
 };

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { prisma } from "../lib/prisma";
+import { AppError } from "../utils/app-error";
+import { assertOrganizationAccess } from "../service/authorization.service";
 
 export const organizationMiddleware = async (
   req: Request<{ organizationId: string }>,
@@ -8,30 +9,19 @@ export const organizationMiddleware = async (
 ) => {
   const { organizationId } = req.params;
   const userId = req.userId;
+
   if (!userId) {
-    return res.status(401).json({
-      message: "Unauthorized",
-    });
+    return next(new AppError("Unauthorized", 401));
   }
+
   if (!organizationId) {
-    return res.status(400).json({
-      message: "Organization ID is required",
-    });
+    return next(new AppError("Organization ID is required", 400));
   }
-  const isUserInOrganization = await prisma.organization.findUnique({
-    where: {
-      id: organizationId,
-      members: {
-        some: {
-          userId,
-        },
-      },
-    },
-  });
-  if (!isUserInOrganization) {
-    return res.status(403).json({
-      message: "You are not a member of this organization",
-    });
+
+  try {
+    await assertOrganizationAccess(organizationId, userId);
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
 };

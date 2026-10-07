@@ -54,12 +54,14 @@ export const deleteList = async (
   req: Request<{ boardId: string; organizationId: string; listId: string }>,
   res: Response,
 ) => {
-  const { listId } = req.params;
+  const { listId, boardId } = req.params;
   const list = await listservice.getListById(listId);
   if (!list) {
     throw new AppError("List not found", 404);
   }
   await listservice.deleteList(listId);
+  const io = getIO();
+  io.to(boardId).emit("list-deleted", listId);
   res
     .status(200)
     .json({
