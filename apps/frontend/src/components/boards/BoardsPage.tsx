@@ -357,27 +357,36 @@ export function BoardDetailPage() {
         }),
       );
     };
-    const handleCardUpdate = (updatedCard : MockCard)=>{
+    const handleCardUpdate = (updatedCard: MockCard) => {
       replaceCard(updatedCard.id, (card) => ({
         ...card,
         title: updatedCard.title,
-        description: updatedCard.description
-        
-      }))
-    }
+        description: updatedCard.description,
+      }));
+    };
+    const handleCardDeleted = (data: { cardId: string }) => {
+      setBoardLists((current) =>
+        current.map((list) => ({
+          ...list,
+          cards: list.cards.filter((card) => card.id !== data.cardId),
+        })),
+      );
+    };
 
     socket.on("list-created", handleListCreated);
     socket.on("list-updated", handleListUpdated);
     socket.on("list-deleted", handleListDeleted);
     socket.on("card-created", handleCardCreated);
-    socket.on("card-updated" , handleCardUpdate);
+    socket.on("card-updated", handleCardUpdate);
+    socket.on("card-deleted",handleCardDeleted);
 
     return () => {
       socket.off("list-created", handleListCreated);
       socket.off("list-updated", handleListUpdated);
       socket.off("list-deleted", handleListDeleted);
       socket.off("card-created", handleCardCreated);
-      socket.off("card-updated" , handleCardUpdate);
+      socket.off("card-updated", handleCardUpdate);
+      socket.off("card-deleted",handleCardDeleted);
     };
   }, []);
 
@@ -424,9 +433,14 @@ export function BoardDetailPage() {
     setBoardLists((current) =>
       current.map((list) =>
         list.cards.some((card) => card.id === cardId)
-          ? { ...list, cards: list.cards.map((card) => (card.id === cardId ? update(card) : card)) }
-          : list
-      )
+          ? {
+              ...list,
+              cards: list.cards.map((card) =>
+                card.id === cardId ? update(card) : card,
+              ),
+            }
+          : list,
+      ),
     );
   }
 

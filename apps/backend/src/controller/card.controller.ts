@@ -100,7 +100,8 @@ export const cardController = {
         cardId: req.params.cardId,
         userId: req.userId!,
       });
-
+      const io = getIO();
+      io.to(req.params.boardId).emit("card-deleted", { cardId: req.params.cardId });
       return res.status(200).json({ message: "Card deleted successfully" });
     } catch (error) {
       next(error);
